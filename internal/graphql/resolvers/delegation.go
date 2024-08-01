@@ -49,10 +49,12 @@ func (del Delegation) IsSelfStake() bool {
 
 // AmountDelegated resolves the active amount the delegation stands for.
 func (del Delegation) AmountDelegated() hexutil.Big {
-	if del.Delegation.AmountDelegated == nil {
+	// get the base amount delegated
+	base, err := repository.R().DelegationAmountStaked(&del.Address, del.Delegation.ToStakerId)
+	if err != nil {
 		return hexutil.Big{}
 	}
-	return *del.Delegation.AmountDelegated
+	return (hexutil.Big)(*base)
 }
 
 // ToStakerId resolves validator ID the delegation belongs to.

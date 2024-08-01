@@ -256,8 +256,13 @@ func (acc *Account) delegationsTotal() (amount *big.Int, inWithdraw *big.Int, re
 	inWithdraw = new(big.Int)
 	for _, dlg := range list {
 		// any active delegated amount?
-		if 0 < dlg.AmountDelegated.ToInt().Uint64() {
-			amount = new(big.Int).Add(amount, dlg.AmountDelegated.ToInt())
+		base, err := repository.R().DelegationAmountStaked(&dlg.Address, dlg.ToStakerId)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+
+		if base.Cmp(zeroInt) > 0 {
+			amount = new(big.Int).Add(amount, base)
 		}
 
 		// get pending rewards for this delegation (can be stashed)
@@ -267,7 +272,8 @@ func (acc *Account) delegationsTotal() (amount *big.Int, inWithdraw *big.Int, re
 		}
 
 		// any rewards?
-		if 0 < rw.Amount.ToInt().Uint64() {
+
+		if rw.Amount.ToInt().Cmp(zeroInt) > 0 {
 			rewards = new(big.Int).Add(rewards, rw.Amount.ToInt())
 		}
 
@@ -278,7 +284,7 @@ func (acc *Account) delegationsTotal() (amount *big.Int, inWithdraw *big.Int, re
 		}
 
 		// add pending withdrawals value
-		if 0 < wd.Uint64() {
+		if wd.Cmp(zeroInt) > 0 {
 			inWithdraw = new(big.Int).Add(inWithdraw, wd)
 		}
 	}
