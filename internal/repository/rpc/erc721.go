@@ -34,7 +34,7 @@ func (ftm *FtmBridge) Erc721Name(token *common.Address) (string, error) {
 	// get the token name
 	name, err := contract.Name(nil)
 	if err != nil {
-		ftm.log.Errorf("ERC721 token %s name not available; %s", token.String(), err.Error())
+		ftm.log.Debugf("ERC721 token %s name not available; %s", token.String(), err.Error())
 		return "", err
 	}
 
@@ -53,7 +53,7 @@ func (ftm *FtmBridge) Erc721Symbol(token *common.Address) (string, error) {
 	// get the token name
 	symbol, err := contract.Symbol(nil)
 	if err != nil {
-		ftm.log.Errorf("ERC721 token %s symbol not available; %s", token.String(), err.Error())
+		ftm.log.Debugf("ERC721 token %s symbol not available; %s", token.String(), err.Error())
 		return "", err
 	}
 
@@ -72,7 +72,7 @@ func (ftm *FtmBridge) Erc721BalanceOf(token *common.Address, owner *common.Addre
 	// get the balance
 	val, err := contract.BalanceOf(nil, *owner)
 	if err != nil {
-		ftm.log.Errorf("can not ERC721 %s balance for %s; %s", token.String(), owner.String(), err.Error())
+		ftm.log.Debugf("can not get ERC721 %s balance for %s; %s", token.String(), owner.String(), err.Error())
 		return hexutil.Big{}, err
 	}
 
@@ -100,7 +100,7 @@ func (ftm *FtmBridge) Erc721TotalSupply(token *common.Address) (hexutil.Big, err
 	// get the amount of tokens allowed for DeFi
 	val, err := contract.TotalSupply(nil)
 	if err != nil {
-		ftm.log.Errorf("can not get ERC721 %s total supply; %s", token.String(), err.Error())
+		ftm.log.Debugf("can not get ERC721 %s total supply; %s", token.String(), err.Error())
 		return hexutil.Big{}, err
 	}
 
@@ -126,7 +126,7 @@ func (ftm *FtmBridge) Erc721TokenURI(token *common.Address, tokenId *big.Int) (s
 	// get the token name
 	uri, err := contract.TokenURI(nil, tokenId)
 	if err != nil {
-		ftm.log.Errorf("ERC721 token %s/%s URI not available; %s", token.String(), tokenId.String(), err.Error())
+		ftm.log.Debugf("ERC721 token %s/%s URI not available; %s", token.String(), tokenId.String(), err.Error())
 		return "", err
 	}
 
@@ -144,7 +144,7 @@ func (ftm *FtmBridge) Erc721OwnerOf(token *common.Address, tokenId *big.Int) (co
 
 	owner, err := contract.OwnerOf(nil, tokenId)
 	if err != nil {
-		ftm.log.Errorf("can not get ERC721 %s owner of %s; %s", token.String(), tokenId.String(), err.Error())
+		ftm.log.Debugf("can not get ERC721 %s owner of %s; %s", token.String(), tokenId.String(), err.Error())
 		return common.Address{}, err
 	}
 

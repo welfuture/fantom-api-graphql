@@ -36,7 +36,7 @@ const (
 	// defLoggingLevel holds default Logging level
 	// See `godoc.org/github.com/op/go-logging` for the full format specification
 	// See `golang.org/pkg/time/` for time format specification
-	defLoggingLevel = "INFO"
+	defLoggingLevel = "NOTICE"
 
 	// defLoggingFormat holds default format of the Logger output
 	defLoggingFormat = "%{color}%{level:-8s} %{shortpkg}/%{shortfunc}%{color:reset}: %{message}"
