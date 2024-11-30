@@ -189,6 +189,16 @@ func (del Delegation) LockedAmount() (hexutil.Big, error) {
 	return hexutil.Big{}, nil
 }
 
+// CreatedTime resolves the creation time.
+func (del Delegation) CreatedTime() (hexutil.Uint64, error) {
+	return hexutil.Uint64(del.Delegation.CreatedTime.Unix()), nil
+}
+
+// IsDelegationLocked resolves the state of the lock.
+func (del Delegation) IsDelegationLocked() (bool, error) {
+	return false, nil
+}
+
 // UnlockedAmount resolves the total amount of unlocked delegation
 // which is available for un-delegate.
 func (del Delegation) UnlockedAmount() (hexutil.Big, error) {

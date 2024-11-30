@@ -31,6 +31,11 @@ func (rs *rootResolver) Erc20Token(args *struct{ Token common.Address }) *ERC20T
 	return NewErc20Token(&args.Token)
 }
 
+// DefiNativeToken resolves the native token for DeFi.
+func (rs *rootResolver) DefiNativeToken() *ERC20Token {
+	return NewErc20Token(nil)
+}
+
 // FMintTokenAllowance resolves the amount of ERC20 tokens unlocked
 // by the token owner for DeFi operations.
 func (rs *rootResolver) FMintTokenAllowance(args *struct {
