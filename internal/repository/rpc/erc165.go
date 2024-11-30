@@ -30,7 +30,7 @@ func (ftm *FtmBridge) Erc165SupportsInterface(address *common.Address, interface
 
 	supports, err := contract.SupportsInterface(nil, interfaceID)
 	if err != nil {
-		ftm.log.Noticef("interface support by ERC165 for contract %s cannot be detected; %s", address.String(), err.Error())
+		ftm.log.Debugf("interface support by ERC165 for contract %s cannot be detected; %s", address.String(), err.Error())
 		return false, err
 	}
 
