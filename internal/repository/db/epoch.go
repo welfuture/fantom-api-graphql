@@ -44,7 +44,7 @@ func (db *MongoDbBridge) initEpochsCollection(col *mongo.Collection) {
 // AddEpoch stores an epoch reference in connected persistent storage.
 func (db *MongoDbBridge) AddEpoch(e *types.Epoch) error {
 	// do we have all needed data? we reject epochs without any stake
-	if e == nil || e.EndTime == 0 || e.StakeTotalAmount.ToInt().Cmp(intZero) <= 0 {
+	if e == nil || e.EndTime == 0 || e.StakeTotalAmount.ToInt().Cmp(intZero) < 0 {
 		return fmt.Errorf("empty epoch received")
 	}
 

@@ -12,7 +12,7 @@ import (
 const epsScanTickerDuration = 25 * time.Millisecond
 
 // epsObserverTickerDuration represents the frequency of the sealed epoch observer.
-const epsObserverTickerDuration = 10 * time.Second
+const epsObserverTickerDuration = 30 * time.Second
 
 // epsStoreQueueLength represents the capacity of the epoch scanner store queue.
 const epsStoreQueueLength = 100
@@ -50,13 +50,13 @@ func (eps *epochScanner) run() {
 	var err error
 	eps.current, err = repo.LastKnownEpoch()
 	if err != nil {
-		log.Criticalf("can not get the last known epoch; %s", err.Error())
-		eps.current = 1
+		log.Warningf("can not get the last known epoch; %s", err.Error())
+		eps.current = 0
 	}
 
-	// signal orchestrator that we start two threads
 	eps.mgr.started(eps)
 	go eps.dequeue()
+
 	eps.mgr.started(eps)
 	go eps.execute()
 }
