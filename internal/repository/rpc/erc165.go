@@ -18,7 +18,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-//go:generate tools/abigen.sh --abi ./contracts/abi/erc165.abi --pkg contracts --type ERC165 --out ./contracts/erc165.go
+//go:generate tools/abigen.sh --abi ./contracts/abi/erc165.json --pkg contracts --type ERC165 --out ./contracts/erc165.go
 
 func (ftm *FtmBridge) Erc165SupportsInterface(address *common.Address, interfaceID [4]byte) (bool, error) {
 	// connect the contract

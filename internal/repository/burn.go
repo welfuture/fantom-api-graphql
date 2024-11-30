@@ -32,22 +32,12 @@ var (
 	burnTreasury = []BurnTreasuryShare{
 		{
 			SinceBlockID:    0,
-			UntilBlockID:    48552263,
-			Since:           0,
-			Until:           1665060100,
-			ToBurn:          big.NewInt(300),
-			ToTreasury:      new(big.Int),
-			ToRewards:       big.NewInt(700),
-			DigitCorrection: big.NewInt(1000),
-		},
-		{
-			SinceBlockID:    48552264,
 			UntilBlockID:    math.MaxUint64,
-			Since:           1665060101,
+			Since:           0,
 			Until:           math.MaxInt64,
-			ToBurn:          big.NewInt(200),
+			ToBurn:          big.NewInt(0),
 			ToTreasury:      big.NewInt(100),
-			ToRewards:       big.NewInt(700),
+			ToRewards:       big.NewInt(800),
 			DigitCorrection: big.NewInt(1000),
 		},
 	}

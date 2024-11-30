@@ -16,7 +16,7 @@ const (
 	// to synchronize contract validation with API peers.
 	contractSyncMutationQuery = "mutation($sc:ContractValidationInput!) { validateContract(contract: $sc) { validated } }"
 
-	// contractSyncCallTimeout represents a time out value used for contract
+	// contractSyncCallTimeout represents a time-out value used for contract
 	// syncing GraphQL calls.
 	contractSyncCallTimeout = 60 * time.Second
 )

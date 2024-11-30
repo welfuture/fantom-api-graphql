@@ -3,6 +3,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fantom-api-graphql/internal/types"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,7 +32,7 @@ func (db *MongoDbBridge) initRewardsCollection(col *mongo.Collection) {
 		db.log.Panicf("can not create indexes for reward claims collection; %s", err.Error())
 	}
 
-	// log we done that
+	// log we've done that
 	db.log.Debugf("reward claims collection initialized")
 }
 
@@ -70,7 +71,7 @@ func (db *MongoDbBridge) isRewardClaimKnown(col *mongo.Collection, rc *types.Rew
 	// error on lookup?
 	if sr.Err() != nil {
 		// may be ErrNoDocuments, which we seek
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			return false
 		}
 		// inform that we can not get the PK; should not happen

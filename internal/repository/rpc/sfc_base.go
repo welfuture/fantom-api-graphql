@@ -13,19 +13,13 @@ We strongly discourage opening Opera RPC interface for unrestricted Internet acc
 */
 package rpc
 
-//go:generate tools/abigen.sh --abi ./contracts/abi/sfc-1.1.abi --pkg contracts --type SfcV1Contract --out ./contracts/sfc-v1.go
-//go:generate tools/abigen.sh --abi ./contracts/abi/sfc-2.0.4-rc.2.abi --pkg contracts --type SfcV2Contract --out ./contracts/sfc-v2.go
-//go:generate tools/abigen.sh --abi ./contracts/abi/sfc-3.0-rc.1.abi --pkg contracts --type SfcContract --out ./contracts/sfc-v3.go
-//go:generate tools/abigen.sh --abi ./contracts/abi/sfc-tokenizer.abi --pkg contracts --type SfcTokenizer --out ./contracts/sfc_tokenizer.go
+//go:generate tools/abigen.sh --abi ./contracts/abi/sfc_4.0.0.json --pkg contracts --type SfcV400Contract --out ./contracts/sfc-v400.go
 
 import (
 	"fantom-api-graphql/internal/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"math/big"
 )
-
-// sfcFirstLockEpoch represents the first epoch with stake locking available.
-const sfcFirstLockEpoch uint64 = 1600
 
 // SfcVersion returns current version of the SFC contract as a single number.
 func (ftm *FtmBridge) SfcVersion() (hexutil.Uint64, error) {
@@ -72,14 +66,13 @@ func (ftm *FtmBridge) Epoch(id hexutil.Uint64) (*types.Epoch, error) {
 	}
 
 	return &types.Epoch{
-		Id:                    id,
-		EndTime:               hexutil.Uint64(epo.EndTime.Uint64()),
-		EpochFee:              (hexutil.Big)(*epo.EpochFee),
-		TotalBaseRewardWeight: (hexutil.Big)(*epo.TotalBaseRewardWeight),
-		TotalTxRewardWeight:   (hexutil.Big)(*epo.TotalTxRewardWeight),
-		BaseRewardPerSecond:   (hexutil.Big)(*epo.BaseRewardPerSecond),
-		StakeTotalAmount:      (hexutil.Big)(*epo.TotalStake),
-		TotalSupply:           (hexutil.Big)(*epo.TotalSupply),
+		Id:                  id,
+		EndTime:             hexutil.Uint64(epo.EndTime.Uint64()),
+		EndBlock:            hexutil.Uint64(epo.EndBlock.Uint64()),
+		EpochFee:            (hexutil.Big)(*epo.EpochFee),
+		BaseRewardPerSecond: (hexutil.Big)(*epo.BaseRewardPerSecond),
+		StakeTotalAmount:    (hexutil.Big)(*epo.TotalStake),
+		TotalSupply:         (hexutil.Big)(*epo.TotalSupply),
 	}, nil
 }
 
@@ -89,18 +82,6 @@ func (ftm *FtmBridge) RewardsAllowed() (bool, error) {
 	return true, nil
 }
 
-// LockingAllowed indicates if the stake locking has been enabled in SFC.
-func (ftm *FtmBridge) LockingAllowed() (bool, error) {
-	// get the current sealed epoch value from the contract
-	epoch, err := ftm.SfcContract().CurrentSealedEpoch(nil)
-	if err != nil {
-		ftm.log.Errorf("failed to get the current sealed epoch: %s", err.Error())
-		return false, err
-	}
-
-	return epoch.Uint64() >= sfcFirstLockEpoch, nil
-}
-
 // TotalStaked returns the total amount of staked tokens.
 func (ftm *FtmBridge) TotalStaked() (*big.Int, error) {
 	return ftm.SfcContract().TotalStake(ftm.DefaultCallOpts())
@@ -108,66 +89,20 @@ func (ftm *FtmBridge) TotalStaked() (*big.Int, error) {
 
 // SfcMinValidatorStake extracts a value of minimal validator self stake.
 func (ftm *FtmBridge) SfcMinValidatorStake() (*big.Int, error) {
-	val, err := ftm.SfcContract().MinSelfStake(ftm.DefaultCallOpts())
-	if err == nil {
-		return val, err
-	}
-
-	// fallback to shards (the new SFC)
 	return ftm.sfcShards.minSelfStake()
 }
 
 // SfcMaxDelegatedRatio extracts a ratio between self delegation and received stake.
 func (ftm *FtmBridge) SfcMaxDelegatedRatio() (*big.Int, error) {
-	val, err := ftm.SfcContract().MaxDelegatedRatio(ftm.DefaultCallOpts())
-	if err == nil {
-		return val, err
-	}
-
-	// fallback to shards (the new SFC)
 	return ftm.sfcShards.maxDelegatedRatio()
-}
-
-// SfcMinLockupDuration extracts a minimal lockup duration.
-func (ftm *FtmBridge) SfcMinLockupDuration() (*big.Int, error) {
-	val, err := ftm.SfcContract().MinLockupDuration(ftm.DefaultCallOpts())
-	if err == nil {
-		return val, err
-	}
-
-	// fallback to shards (the new SFC)
-	return ftm.sfcShards.minLockupDuration()
-}
-
-// SfcMaxLockupDuration extracts a maximal lockup duration.
-func (ftm *FtmBridge) SfcMaxLockupDuration() (*big.Int, error) {
-	val, err := ftm.SfcContract().MaxLockupDuration(ftm.DefaultCallOpts())
-	if err == nil {
-		return val, err
-	}
-
-	// fallback to shards (the new SFC)
-	return ftm.sfcShards.maxLockupDuration()
 }
 
 // SfcWithdrawalPeriodEpochs extracts a minimal number of epochs between un-delegate and withdraw.
 func (ftm *FtmBridge) SfcWithdrawalPeriodEpochs() (*big.Int, error) {
-	val, err := ftm.SfcContract().WithdrawalPeriodEpochs(ftm.DefaultCallOpts())
-	if err == nil {
-		return val, err
-	}
-
-	// fallback to shards (the new SFC)
 	return ftm.sfcShards.withdrawalPeriodEpochs()
 }
 
 // SfcWithdrawalPeriodTime extracts a minimal number of seconds between un-delegate and withdraw.
 func (ftm *FtmBridge) SfcWithdrawalPeriodTime() (*big.Int, error) {
-	val, err := ftm.SfcContract().WithdrawalPeriodTime(ftm.DefaultCallOpts())
-	if err == nil {
-		return val, err
-	}
-
-	// fallback to shards (the new SFC)
 	return ftm.sfcShards.withdrawalPeriodTime()
 }

@@ -26,7 +26,7 @@ func (rwc RewardClaim) ToStakerId() hexutil.Big {
 	return rwc.ToValidatorId
 }
 
-// IsRestaked resolves the restake mark of the claim.
+// IsRestaked resolves the restaked mark of the claim.
 func (rwc RewardClaim) IsRestaked() bool {
 	return rwc.IsDelegated
 }

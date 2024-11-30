@@ -39,17 +39,12 @@ type FtmBridge struct {
 	cg  *singleflight.Group
 
 	// fMintCfg represents the configuration of the fMint protocol
-	sigConfig     *config.ServerSignature
-	sfcConfig     *config.Staking
-	uniswapConfig *config.DeFiUniswap
-
-	// extended minter config
-	fMintCfg fMintConfig
-	fLendCfg fLendConfig
+	sigConfig *config.ServerSignature
+	sfcConfig *config.Staking
 
 	// common contracts
 	sfcAbi      *abi.ABI
-	sfcContract *contracts.SfcContract
+	sfcContract *contracts.SfcV400Contract
 	sfcShards   sfcShards
 
 	// received blocks proxy
@@ -74,13 +69,8 @@ func New(cfg *config.Config, log logger.Logger) (*FtmBridge, error) {
 		cg:  new(singleflight.Group),
 
 		// special configuration options below this line
-		sigConfig:     &cfg.Signature,
-		sfcConfig:     &cfg.Staking,
-		uniswapConfig: &cfg.DeFi.Uniswap,
-		fMintCfg: fMintConfig{
-			addressProvider: cfg.DeFi.FMint.AddressProvider,
-		},
-		fLendCfg: fLendConfig{lendigPoolAddress: cfg.DeFi.FLend.LendingPool},
+		sigConfig: &cfg.Signature,
+		sfcConfig: &cfg.Staking,
 
 		// empty shards
 		sfcShards: sfcShards{log: log, client: con, sfc: cfg.Staking.SFCContract},
@@ -93,9 +83,6 @@ func New(cfg *config.Config, log logger.Logger) (*FtmBridge, error) {
 
 	// inform about the local address of the API node
 	log.Noticef("using signature address %s", br.sigConfig.Address.String())
-
-	// add the bridge ref to the fMintCfg and return the instance
-	br.fMintCfg.bridge = br
 	br.run()
 	return br, nil
 }
@@ -170,12 +157,11 @@ func (ftm *FtmBridge) DefaultCallOpts() *bind.CallOpts {
 }
 
 // SfcContract returns instance of SFC contract for interaction.
-func (ftm *FtmBridge) SfcContract() *contracts.SfcContract {
+func (ftm *FtmBridge) SfcContract() *contracts.SfcV400Contract {
 	// lazy create SFC contract instance
 	if nil == ftm.sfcContract {
-		// instantiate the contract and display its name
 		var err error
-		ftm.sfcContract, err = contracts.NewSfcContract(ftm.sfcConfig.SFCContract, ftm.eth)
+		ftm.sfcContract, err = contracts.NewSfcV400Contract(ftm.sfcConfig.SFCContract, ftm.eth)
 		if err != nil {
 			ftm.log.Criticalf("failed to instantiate SFC contract; %s", err.Error())
 			panic(err)
@@ -187,7 +173,7 @@ func (ftm *FtmBridge) SfcContract() *contracts.SfcContract {
 // SfcAbi returns a parse ABI of the AFC contract.
 func (ftm *FtmBridge) SfcAbi() *abi.ABI {
 	if nil == ftm.sfcAbi {
-		ab, err := abi.JSON(strings.NewReader(contracts.SfcContractABI))
+		ab, err := abi.JSON(strings.NewReader(contracts.SfcV400ContractMetaData.ABI))
 		if err != nil {
 			ftm.log.Criticalf("failed to parse SFC contract ABI; %s", err.Error())
 			panic(err)

@@ -3,13 +3,11 @@ package config
 
 // default configuration elements and keys
 const (
-	configFileName = "apiserver"
+	configFileName = "api"
 
 	// configuration options
 	keyAppName                  = "app_name"
 	keyConfigFilePath           = "cfg"
-	keyConfigCmdBlockScanStart  = "cmd.blk_from"
-	keyConfigCmdBlockScanEnd    = "cmd.blk_to"
 	keyConfigCmdBlockScanReScan = "cmd.rescan"
 	keyConfigCmdRestoreStake    = "cmd.fix_stake"
 
@@ -46,9 +44,6 @@ const (
 	keyCacheEvictionTime = "cache.eviction"
 	keyCacheMaxSize      = "cache.size"
 
-	// contract validation related
-	keySolCompilerPath = "compiler.sol"
-
 	// utility options
 	keyVotingSources         = "voting.sources"
 	keyErc20TokenMapFilePath = "erc20_tokens_file"
@@ -59,11 +54,6 @@ const (
 	keyStakingStiContract       = "staking.sti"
 	keyStakingTokenizerContract = "staking.tokenizer"
 	keyStakingERC20Token        = "staking.token"
-
-	// defi related configs
-	keyDefiFMintAddressProvider = "defi.fmint.address_provider"
-	keyDefiUniswapCore          = "defi.uniswap.core"
-	keyDefiUniswapRouter        = "defi.uniswap.router"
 
 	keyP2PBindUDP = "p2p.bind_udp"
 )

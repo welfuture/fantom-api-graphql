@@ -26,10 +26,10 @@ var TransactionGasCorrection = new(big.Int).SetUint64(10000000)
 
 // Transaction represents basic information provided by the API about transaction inside Opera blockchain.
 type Transaction struct {
-	// BlockHash represents hash of the block where this transaction was in. nil when its pending.
+	// BlockHash represents hash of the block where this transaction was in. nil when it's pending.
 	BlockHash *common.Hash `json:"blockHash"`
 
-	// BlockNumber represents number of the block where this transaction was in. nil when its pending.
+	// BlockNumber represents number of the block where this transaction was in. nil when it's pending.
 	BlockNumber *hexutil.Uint64 `json:"blockNumber"`
 
 	// TimeStamp represents the time stamp of the transaction.
@@ -56,13 +56,13 @@ type Transaction struct {
 	// Nonce represents the number of transactions made by the sender prior to this one.
 	Nonce hexutil.Uint64 `json:"nonce"`
 
-	// To represents the address of the receiver. nil when its a contract creation transaction.
+	// To represents the address of the receiver. nil when it's a contract creation transaction.
 	To *common.Address `json:"to,omitempty"`
 
 	// ContractAddress represents the address of contract created, if a contract creation transaction, otherwise nil.
 	ContractAddress *common.Address `json:"contract,omitempty"`
 
-	// TrxIndex represents integer of the transaction's index position in the block. nil when its pending.
+	// TrxIndex represents integer of the transaction's index position in the block. nil when it's pending.
 	TrxIndex *hexutil.Uint `json:"transactionIndex,omitempty"`
 
 	// Value represents value transferred in Wei.
@@ -119,7 +119,7 @@ type BsonTransaction struct {
 }
 
 // Uid calculates an ordinal index of the transaction referenced.
-// The ordinal index of a transaction should be unique across a consistent block chain.
+// The ordinal index of a transaction should be unique across a consistent blockchain.
 // The calculation gives us about 700 years of index space with 50k blocks per second
 // rate + 10 years to fix than. Max number of transactions in a block here is 14bits = 16383.
 func (trx *Transaction) Uid() uint64 {

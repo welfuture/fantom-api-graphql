@@ -20,7 +20,7 @@ import (
 	"math/big"
 )
 
-//go:generate tools/abigen.sh --abi ./contracts/abi/erc721.abi --pkg contracts --type ERC721 --out ./contracts/erc721_token.go
+//go:generate tools/abigen.sh --abi ./contracts/abi/erc721.json --pkg contracts --type ERC721 --out ./contracts/erc721_token.go
 
 // Erc721Name provides information about the name of the ERC721 token.
 func (ftm *FtmBridge) Erc721Name(token *common.Address) (string, error) {

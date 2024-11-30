@@ -14,20 +14,22 @@ import (
 type Epoch struct {
 	Id                    hexutil.Uint64 `json:"id"`
 	EndTime               hexutil.Uint64 `json:"end"`
+	EndBlock              hexutil.Uint64 `json:"block"`
 	EpochFee              hexutil.Big    `json:"fee"`
 	EpochFeeBurn          hexutil.Big    `json:"burn"`
 	EpochFeeTreasury      hexutil.Big    `json:"treasury"`
 	TotalBaseRewardWeight hexutil.Big    `json:"trw"`
 	TotalTxRewardWeight   hexutil.Big    `json:"txw"`
 	BaseRewardPerSecond   hexutil.Big    `json:"brw"`
-	StakeTotalAmount      hexutil.Big    `json:"stk"`
-	TotalSupply           hexutil.Big    `json:"sup"`
+	StakeTotalAmount      hexutil.Big    `json:"stake"`
+	TotalSupply           hexutil.Big    `json:"supply"`
 }
 
 // BsonEpoch represents the epoch data structure for BSON formatting.
 type BsonEpoch struct {
 	ID                  int64     `bson:"_id"`
 	EndTime             int64     `bson:"et"`
+	EndBlock            int64     `bson:"block"`
 	End                 time.Time `bson:"end"`
 	Fee                 string    `bson:"fee"`
 	FeeBurn             string    `bson:"feb"`
@@ -62,6 +64,7 @@ func (e *Epoch) MarshalBSON() ([]byte, error) {
 	return bson.Marshal(BsonEpoch{
 		ID:                  int64(e.Id),
 		EndTime:             int64(e.EndTime),
+		EndBlock:            int64(e.EndBlock),
 		End:                 time.Unix(int64(e.EndTime), 0),
 		Fee:                 e.EpochFee.String(),
 		FeeBurn:             e.EpochFeeBurn.String(),
@@ -93,6 +96,7 @@ func (e *Epoch) UnmarshalBSON(data []byte) (err error) {
 	// transfer the data points
 	e.Id = (hexutil.Uint64)(row.ID)
 	e.EndTime = (hexutil.Uint64)(row.EndTime)
+	e.EndBlock = (hexutil.Uint64)(row.EndBlock)
 	e.EpochFee = (hexutil.Big)(*hexutil.MustDecodeBig(row.Fee))
 	e.EpochFeeBurn = (hexutil.Big)(*hexutil.MustDecodeBig(row.FeeBurn))
 	e.EpochFeeTreasury = (hexutil.Big)(*hexutil.MustDecodeBig(row.FeeTreasury))

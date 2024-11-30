@@ -134,11 +134,12 @@ func (gc *GovernanceContract) sfcDelegationsBy(addr common.Address) ([]common.Ad
 	res := make([]common.Address, 0)
 	for _, d := range dl {
 		// is the delegation ok for voting?
-		if 0 == d.AmountDelegated.ToInt().Uint64() {
-			log.Debugf("delegation to %d from address %s is deactivated", d.ToStakerId, addr.String())
+		if 0 == d.Amount.ToInt().Uint64() {
+			log.Debugf("delegation to %d from address %s is deactivated",
+				d.ToValidatorID.ToInt().Int64(), addr.String())
 			continue
 		}
-		res = append(res, d.ToStakerAddress)
+		res = append(res, d.ToValidatorAddress)
 	}
 
 	// log delegations found

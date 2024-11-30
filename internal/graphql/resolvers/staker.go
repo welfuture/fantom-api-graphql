@@ -7,13 +7,11 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"golang.org/x/sync/singleflight"
 	"math/big"
-	"time"
 )
 
 const (
 	// call group keys used to prevent parallel pull of the same value
 	// in multithreading processing environment
-	stakerCallGroupLock          = "lock"
 	stakerCallGroupStake         = "stake"
 	stakerCallGroupMaxDelegation = "max_delegation"
 	stakerCallGroupDowntime      = "down"
@@ -61,52 +59,19 @@ func (st Staker) StakerInfo() *types.StakerInfo {
 	return repository.R().RetrieveStakerInfo(&st.Id)
 }
 
-// DelegationLock returns information about validator lock.
-func (st Staker) DelegationLock() (*types.DelegationLock, error) {
-	// load the delegations lock only once
-	dl, err, _ := st.cg.Do(stakerCallGroupLock, func() (interface{}, error) {
-		return repository.R().DelegationLock(&st.StakerAddress, &st.Id)
-	})
-	if err != nil {
-		return nil, err
-	}
-	return dl.(*types.DelegationLock), nil
-}
-
 // IsStakeLocked signals if the stake is locked right now.
 func (st Staker) IsStakeLocked() (bool, error) {
-	lock, err := st.DelegationLock()
-	if err != nil {
-		return false, err
-	}
-	return lock != nil && 0 > zeroInt.Cmp(lock.LockedAmount.ToInt()) && uint64(lock.LockedUntil) < uint64(time.Now().UTC().Unix()), nil
+	return false, nil
 }
 
 // LockedUntil resolves the end time of delegation.
 func (st Staker) LockedUntil() (hexutil.Uint64, error) {
-	// get the lock detail
-	lock, err := st.DelegationLock()
-	if err != nil {
-		return hexutil.Uint64(0), err
-	}
-	// is there any lock in place?
-	if lock == nil || 0 <= zeroInt.Cmp(lock.LockedAmount.ToInt()) {
-		return hexutil.Uint64(0), nil
-	}
-	return lock.LockedUntil, nil
+	return 0, nil
 }
 
-// LockedFromEpoch resolves the epoch om which the lock has been created.
+// LockedFromEpoch resolves the epoch on which the lock has been created.
 func (st Staker) LockedFromEpoch() (hexutil.Uint64, error) {
-	lock, err := st.DelegationLock()
-	if err != nil {
-		return hexutil.Uint64(0), err
-	}
-	// is there any lock in place?
-	if lock == nil || 0 <= zeroInt.Cmp(lock.LockedAmount.ToInt()) {
-		return hexutil.Uint64(0), nil
-	}
-	return lock.LockedFromEpoch, nil
+	return 0, nil
 }
 
 // WithdrawRequests resolves partial withdraw requests of the staker.
@@ -155,7 +120,7 @@ func (st Staker) DelegatedMe() (hexutil.Big, error) {
 	}
 
 	// make a sanity check for the corner amounts
-	// the self stake must be lower value than the total stake
+	// the self stake must be lower than the total stake
 	if sf.ToInt().Cmp(st.TotalStake.ToInt()) >= 0 {
 		return hexutil.Big{}, err
 	}
@@ -247,7 +212,7 @@ func (st Staker) MissedBlocks() (hexutil.Uint64, error) {
 	return hexutil.Uint64(blk), err
 }
 
-// downtime pulls information about the validator down time and missed blocks from aBFT API.
+// downtime pulls information about the validator downtime and missed blocks from aBFT API.
 func (st Staker) downtime() (uint64, uint64, error) {
 	// how the call group responds
 	type dt struct {

@@ -256,7 +256,7 @@ func (acc *Account) delegationsTotal() (amount *big.Int, inWithdraw *big.Int, re
 	inWithdraw = new(big.Int)
 	for _, dlg := range list {
 		// any active delegated amount?
-		base, err := repository.R().DelegationAmountStaked(&dlg.Address, dlg.ToStakerId)
+		base, err := repository.R().DelegationAmountStaked(&dlg.Address, dlg.ToValidatorID)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -266,7 +266,7 @@ func (acc *Account) delegationsTotal() (amount *big.Int, inWithdraw *big.Int, re
 		}
 
 		// get pending rewards for this delegation (can be stashed)
-		rw, err := repository.R().PendingRewards(&acc.Address, dlg.ToStakerId)
+		rw, err := repository.R().PendingRewards(&acc.Address, dlg.ToValidatorID)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -278,7 +278,7 @@ func (acc *Account) delegationsTotal() (amount *big.Int, inWithdraw *big.Int, re
 		}
 
 		// get pending withdrawals
-		wd, err := repository.R().WithdrawRequestsPendingTotal(&acc.Address, dlg.ToStakerId)
+		wd, err := repository.R().WithdrawRequestsPendingTotal(&acc.Address, dlg.ToValidatorID)
 		if err != nil {
 			return nil, nil, nil, err
 		}

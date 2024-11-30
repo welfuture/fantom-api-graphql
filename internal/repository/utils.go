@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"io/ioutil"
+	"io"
 	"math"
 	"net/http"
 	"strings"
@@ -205,7 +205,7 @@ func (p *proxy) makePriceRequest(sym string) (types.Price, error) {
 	}()
 
 	// read the data
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return types.Price{}, fmt.Errorf("can not read price API response; %s", err.Error())
 	}

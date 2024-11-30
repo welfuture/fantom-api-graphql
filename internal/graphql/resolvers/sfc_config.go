@@ -52,20 +52,12 @@ func (sc SfcConfig) MaxDelegatedRatio() (hexutil.Big, error) {
 
 // MinLockupDuration resolves the lowest lockup duration allowed.
 func (sc SfcConfig) MinLockupDuration() (hexutil.Big, error) {
-	c, err := sc.getConfig()
-	if err != nil {
-		return hexutil.Big{}, err
-	}
-	return c.MinLockupDuration, nil
+	return hexutil.Big{}, nil
 }
 
 // MaxLockupDuration resolves the highest lockup duration allowed.
 func (sc SfcConfig) MaxLockupDuration() (hexutil.Big, error) {
-	c, err := sc.getConfig()
-	if err != nil {
-		return hexutil.Big{}, err
-	}
-	return c.MaxLockupDuration, nil
+	return hexutil.Big{}, nil
 }
 
 // WithdrawalPeriodEpochs resolves the minimal number of epochs allowed

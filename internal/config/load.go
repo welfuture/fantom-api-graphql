@@ -1,25 +1,19 @@
 package config
 
 import (
-	"bytes"
 	"crypto/ecdsa"
-	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/enr"
-	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"reflect"
-	"strings"
 )
 
 // Load provides a loaded configuration for Fantom API server.
@@ -69,7 +63,8 @@ func readConfigFile() (*viper.Viper, error) {
 	// Try to read the file
 	if err := cfg.ReadInConfig(); err != nil {
 		// is this an error notifying missing config file?
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if !errors.As(err, &configFileNotFoundError) {
 			// Config file was found but another error was produced
 			log.Printf("can not read the server configuration")
 			return nil, err
@@ -108,7 +103,7 @@ func loadErc20LogMap(cfg *Config) {
 	log.Printf("loading ERC20 tokens from %s", cfg.TokenLogoFilePath)
 
 	// read the whole file
-	data, err := ioutil.ReadAll(f)
+	data, err := io.ReadAll(f)
 	if err != nil {
 		log.Printf("can not read ERC20 tokens map file; %s", err.Error())
 		return
@@ -131,7 +126,6 @@ func setupConfigUnmarshaler(cfg *mapstructure.DecoderConfig) {
 	cfg.DecodeHook = mapstructure.ComposeDecodeHookFunc(
 		StringToAddressHookFunc(),
 		StringToPrivateKeyHookFunc(),
-		StringToEnodeHookFunc(),
 		cfg.DecodeHook)
 }
 
@@ -189,71 +183,9 @@ func StringToAddressHookFunc() mapstructure.DecodeHookFuncType {
 	}
 }
 
-// StringToEnodeHookFunc decodes a string URI to network node address in enode format.
-func StringToEnodeHookFunc() mapstructure.DecodeHookFuncType {
-	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
-		// make sure the input is expected String
-		if f.Kind() != reflect.String {
-			return data, nil
-		}
-
-		// make sure the output is expected to be enode address
-		if t != reflect.TypeOf(enode.Node{}) {
-			return data, nil
-		}
-
-		n, err := parseNodeAddress(data.(string))
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	}
-}
-
 // stringToAddress converts the given String to typed Address.
 func stringToAddress(str string) (interface{}, error) {
 	return common.HexToAddress(str), nil
-}
-
-// parseNodeAddress parses a node record and verifies its signature.
-func parseNodeAddress(uri string) (*enode.Node, error) {
-	if strings.HasPrefix(uri, "enode://") {
-		return enode.ParseV4(uri)
-	}
-
-	bin := []byte(uri)
-	if d, ok := decodeNodeRecordHex(bytes.TrimSpace(bin)); ok {
-		bin = d
-	} else if d, ok := decodeNodeRecordBase64(bytes.TrimSpace(bin)); ok {
-		bin = d
-	}
-
-	var r enr.Record
-	err := rlp.DecodeBytes(bin, &r)
-	if err != nil {
-		return nil, err
-	}
-	return enode.New(enode.ValidSchemes, &r)
-}
-
-// decodeNodeRecordHex decodes RLP encoded enode record in HEX notation.
-func decodeNodeRecordHex(b []byte) ([]byte, bool) {
-	if bytes.HasPrefix(b, []byte("0x")) {
-		b = b[2:]
-	}
-	dec := make([]byte, hex.DecodedLen(len(b)))
-	_, err := hex.Decode(dec, b)
-	return dec, err == nil
-}
-
-// decodeNodeRecordBase64 decodes RPL encoded enode record in Base64 notation.
-func decodeNodeRecordBase64(b []byte) ([]byte, bool) {
-	if bytes.HasPrefix(b, []byte("enr:")) {
-		b = b[4:]
-	}
-	dec := make([]byte, base64.RawURLEncoding.DecodedLen(len(b)))
-	n, err := base64.RawURLEncoding.Decode(dec, b)
-	return dec[:n], err == nil
 }
 
 // reader provides instance of the config reader.

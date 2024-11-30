@@ -83,12 +83,6 @@ func (bld *blockDispatcher) execute() {
 				continue
 			}
 
-			// broadcast the block event
-			select {
-			case bld.onBlock <- blk:
-			case <-time.After(200 * time.Millisecond):
-			}
-
 			// add the block to the ring
 			repo.CacheBlock(blk)
 		}

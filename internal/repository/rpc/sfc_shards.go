@@ -10,8 +10,6 @@ If you considering it as your deployment strategy, you should establish encrypte
 and Opera RPC interface with connection limited to specified endpoints.
 
 We strongly discourage opening Opera RPC interface for unrestricted Internet access.
----
-curl -H "Content-Type: application/json" -X POST --data '{"method":"eth_call","params":[{"from":"0x0000000000000000000000000000000000000000","to":"0xFC00FACE00000000000000000000000000000000","gas":"0x1ec77","gasPrice":"0x92e59e9300","value":"0x0","data":"0xc5f956af"},"latest"],"id":1,"jsonrpc":"2.0"}' https://rpcapi-tracing.fantom.network/
 */
 package rpc
 
@@ -28,16 +26,7 @@ import (
 	"time"
 )
 
-// sfcShards holds a cached values for SFC contract shards.
-type sfcShards struct {
-	log       logger.Logger
-	client    *ethclient.Client
-	sfc       common.Address
-	update    time.Time
-	lock      sync.Mutex
-	constants common.Address
-	treasury  common.Address
-}
+//go:generate tools/abigen.sh --abi ./contracts/abi/sfc_constants.json --pkg contracts --type SfcV400Constants --out ./contracts/sfc-v400-constants.go
 
 var (
 	// callSigConstAddress represents function signature for constants contract address
@@ -61,15 +50,6 @@ var (
 	// callSigTreasuryFeeShare represents function signature for treasuryFeeShare() returning uint256
 	callSigTreasuryFeeShare = []byte{0x94, 0xc3, 0xe9, 0x14}
 
-	// callSigUnlockedRewardRatio represents function signature for unlockedRewardRatio() returning uint256
-	callSigUnlockedRewardRatio = []byte{0x5e, 0x23, 0x08, 0xd2}
-
-	// callSigMinLockupDuration represents function signature for minLockupDuration() returning uint256
-	callSigMinLockupDuration = []byte{0x0d, 0x7b, 0x26, 0x09}
-
-	// callSigMaxLockupDuration represents function signature for maxLockupDuration() returning uint256
-	callSigMaxLockupDuration = []byte{0x0d, 0x49, 0x55, 0xe3}
-
 	// callSigWithdrawalPeriodEpochs represents function signature for withdrawalPeriodEpochs() returning uint256
 	callSigWithdrawalPeriodEpochs = []byte{0x65, 0x0a, 0xcd, 0x66}
 
@@ -83,6 +63,17 @@ var (
 	callSigTargetGasPowerPerSecond = []byte{0x3a, 0x3e, 0xf6, 0x6c}
 )
 
+// sfcShards holds a cached values for SFC contract shards.
+type sfcShards struct {
+	log       logger.Logger
+	client    *ethclient.Client
+	sfc       common.Address
+	update    time.Time
+	lock      sync.Mutex
+	constants common.Address
+	treasury  common.Address
+}
+
 // sfcLoadShards loads shards addresses from SFC contract.
 func (sha *sfcShards) assertShards() {
 	// do we have up-to-date shards addresses
@@ -91,7 +82,7 @@ func (sha *sfcShards) assertShards() {
 	}
 
 	// new timeout
-	sha.update = time.Now().Add(1 * time.Hour)
+	sha.update = time.Now().Add(30 * time.Minute)
 	sha.loadConstantsAddress()
 }
 
@@ -192,21 +183,6 @@ func (sha *sfcShards) burntFeeShare() (*big.Int, error) {
 // treasuryFeeShare provides the percentage of fees to transfer to treasury address, i.e. 10%.
 func (sha *sfcShards) treasuryFeeShare() (*big.Int, error) {
 	return sha.constantBySignature(callSigTreasuryFeeShare)
-}
-
-// unlockedRewardRatio provides the ratio of the reward rate at base rate (no lock), i.e. 30%.
-func (sha *sfcShards) unlockedRewardRatio() (*big.Int, error) {
-	return sha.constantBySignature(callSigUnlockedRewardRatio)
-}
-
-// minLockupDuration provides the minimum duration of a stake/delegation lockup, i.e. 2 weeks.
-func (sha *sfcShards) minLockupDuration() (*big.Int, error) {
-	return sha.constantBySignature(callSigMinLockupDuration)
-}
-
-// maxLockupDuration provides the maximum duration of a stake/delegation lockup, i.e. 1 year.
-func (sha *sfcShards) maxLockupDuration() (*big.Int, error) {
-	return sha.constantBySignature(callSigMaxLockupDuration)
 }
 
 // withdrawalPeriodEpochs provides the number of epochs that undelegated stake is locked for.

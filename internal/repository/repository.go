@@ -13,8 +13,6 @@ import (
 	"fantom-api-graphql/internal/logger"
 	"fantom-api-graphql/internal/repository/cache"
 	"fantom-api-graphql/internal/repository/db"
-	"fantom-api-graphql/internal/repository/geoip"
-	"fantom-api-graphql/internal/repository/p2p"
 	"fantom-api-graphql/internal/repository/rpc"
 	"fmt"
 	"golang.org/x/sync/singleflight"
@@ -62,7 +60,6 @@ type proxy struct {
 	cache *cache.MemBridge
 	db    *db.MongoDbBridge
 	rpc   *rpc.FtmBridge
-	geoip *geoip.Bridge
 	log   logger.Logger
 	cfg   *config.Config
 
@@ -88,11 +85,8 @@ func newRepository() Repository {
 		panic(fmt.Errorf("missing logger"))
 	}
 
-	p2p.SetConfig(cfg)
-	p2p.SetLogger(log)
-
 	// create connections
-	caBridge, dbBridge, rpcBridge, geoBridge, err := connect(cfg, log)
+	caBridge, dbBridge, rpcBridge, err := connect(cfg, log)
 	if err != nil {
 		log.Fatal("repository init failed")
 		return nil
@@ -103,7 +97,6 @@ func newRepository() Repository {
 		cache: caBridge,
 		db:    dbBridge,
 		rpc:   rpcBridge,
-		geoip: geoBridge,
 		log:   log,
 		cfg:   cfg,
 
@@ -132,36 +125,29 @@ func governanceContractsMap(cfg config.Governance) map[string]config.GovernanceC
 }
 
 // connect opens connections to the external sources we need.
-func connect(cfg *config.Config, log logger.Logger) (*cache.MemBridge, *db.MongoDbBridge, *rpc.FtmBridge, *geoip.Bridge, error) {
+func connect(cfg *config.Config, log logger.Logger) (*cache.MemBridge, *db.MongoDbBridge, *rpc.FtmBridge, error) {
 	// create new in-memory cache bridge
 	caBridge, err := cache.New(cfg, log)
 	if err != nil {
 		log.Criticalf("can not create in-memory cache bridge, %s", err.Error())
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	// create new database connection bridge
 	dbBridge, err := db.New(cfg, log)
 	if err != nil {
 		log.Criticalf("can not connect backend persistent storage, %s", err.Error())
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	// create new Opera RPC bridge
 	rpcBridge, err := rpc.New(cfg, log)
 	if err != nil {
 		log.Criticalf("can not connect Opera RPC interface, %s", err.Error())
-		return nil, nil, nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	// open GeoIP service bridge
-	geo, err := geoip.New(&cfg.OperaNetwork, log)
-	if err != nil {
-		log.Criticalf("GeoIP service failed; %s", err.Error())
-		return nil, nil, nil, nil, err
-	}
-
-	return caBridge, dbBridge, rpcBridge, geo, nil
+	return caBridge, dbBridge, rpcBridge, nil
 }
 
 // Close with close all connections and clean up the pending work for graceful termination.
@@ -170,7 +156,6 @@ func (p *proxy) Close() {
 	p.log.Notice("repository is closing")
 
 	// close connections
-	p.geoip.Close()
 	p.rpc.Close()
 	p.db.Close()
 

@@ -4,7 +4,6 @@ package types
 import (
 	"encoding/binary"
 	"encoding/json"
-	"fantom-api-graphql/internal/repository/rpc/contracts"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -151,7 +150,7 @@ func NewSfcContract(addr *common.Address, ver uint64, block *Block, trx *Transac
 	con.License = "MIT"
 	con.Compiler = "Solidity"
 	con.SourceCode = "https://github.com/Fantom-foundation/opera-sfc"
-	con.Abi = contracts.SfcContractABI
+	// con.Abi = contracts.SfcContractABI
 	con.Validated = &block.TimeStamp
 	return con
 }
@@ -168,7 +167,7 @@ func NewStiContract(addr *common.Address, block *Block, trx *Transaction) *Contr
 	con.License = "MIT"
 	con.Compiler = "Solidity"
 	con.SourceCode = "https://github.com/block42-blockchain-company/fantom-staker-info"
-	con.Abi = contracts.StakerInfoContractABI
+	// con.Abi = contracts.StakerInfoContractABI
 	return con
 }
 

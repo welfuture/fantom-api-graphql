@@ -3,6 +3,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fantom-api-graphql/internal/types"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -64,7 +65,7 @@ func (db *MongoDbBridge) Delegation(addr *common.Address, valID *hexutil.Big) (*
 
 	// do we have the data?
 	if sr.Err() != nil {
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			db.log.Errorf("delegation %s to #%d not found", addr.String(), valID.ToInt().Uint64())
 			return nil, ErrUnknownDelegation
 		}
@@ -91,7 +92,7 @@ func (db *MongoDbBridge) AddDelegation(dl *types.Delegation) error {
 
 	// try to do the insert
 	if _, err := col.InsertOne(context.Background(), dl); err != nil {
-		db.log.Criticalf("can not add delegation %s to %d; %s", dl.Address.String(), dl.ToStakerId.ToInt().Uint64(), err.Error())
+		db.log.Criticalf("can not add delegation %s to %d; %s", dl.Address.String(), dl.ToValidatorID.ToInt().Uint64(), err.Error())
 		return err
 	}
 
@@ -108,23 +109,23 @@ func (db *MongoDbBridge) UpdateDelegation(dl *types.Delegation) error {
 	col := db.client.Database(db.dbName).Collection(colDelegations)
 
 	// calculate the value to 9 digits (and 18 billions remain available)
-	val := new(big.Int).Div(dl.AmountDelegated.ToInt(), types.DelegationDecimalsCorrection).Uint64()
+	val := new(big.Int).Div(dl.Amount.ToInt(), types.DelegationDecimalsCorrection).Uint64()
 
 	// notify
 	db.log.Debugf("updating delegation %s to #%d value to %d",
-		dl.Address.String(), dl.ToStakerId.ToInt().Uint64(), val)
+		dl.Address.String(), dl.ToValidatorID.ToInt().Uint64(), val)
 
 	// try to update a delegation by replacing it in the database
 	// we use address and validator ID to identify unique delegation
 	er, err := col.UpdateOne(context.Background(), bson.D{
 		{Key: types.FiDelegationAddress, Value: dl.Address.String()},
-		{Key: types.FiDelegationToValidator, Value: dl.ToStakerId.String()},
+		{Key: types.FiDelegationToValidator, Value: dl.ToValidatorID.String()},
 	}, bson.D{{Key: "$set", Value: bson.D{
 		{Key: types.FiDelegationOrdinal, Value: dl.OrdinalIndex()},
-		{Key: types.FiDelegationStamp, Value: time.Unix(int64(dl.CreatedTime), 0)},
+		{Key: types.FiDelegationStamp, Value: time.Unix(dl.CreatedTime.Unix(), 0)},
 		{Key: types.FiDelegationTransaction, Value: dl.Transaction.String()},
-		{Key: types.FiDelegationToValidatorAddress, Value: dl.ToStakerAddress.String()},
-		{Key: types.FiDelegationAmountActive, Value: dl.AmountDelegated.String()},
+		{Key: types.FiDelegationToValidatorAddress, Value: dl.ToValidatorAddress.String()},
+		{Key: types.FiDelegationAmountActive, Value: dl.Amount.String()},
 		{Key: types.FiDelegationValue, Value: val},
 	}}}, new(options.UpdateOptions).SetUpsert(true))
 	if err != nil {
@@ -134,7 +135,7 @@ func (db *MongoDbBridge) UpdateDelegation(dl *types.Delegation) error {
 
 	// do we actually have the document
 	if 0 == er.MatchedCount {
-		db.log.Errorf("delegation %s to %d not found", dl.Address.String(), dl.ToStakerId.ToInt().Uint64())
+		db.log.Errorf("delegation %s to %d not found", dl.Address.String(), dl.ToValidatorID.ToInt().Uint64())
 	}
 
 	// make sure delegation collection is initialized
@@ -182,7 +183,7 @@ func (db *MongoDbBridge) isDelegationKnown(col *mongo.Collection, dl *types.Dele
 	// try to find the delegation in the database
 	sr := col.FindOne(context.Background(), bson.D{
 		{Key: types.FiDelegationAddress, Value: dl.Address.String()},
-		{Key: types.FiDelegationToValidator, Value: dl.ToStakerId.String()},
+		{Key: types.FiDelegationToValidator, Value: dl.ToValidatorID.String()},
 	}, options.FindOne().SetProjection(bson.D{
 		{Key: types.FiDelegationPk, Value: true},
 	}))
@@ -190,7 +191,7 @@ func (db *MongoDbBridge) isDelegationKnown(col *mongo.Collection, dl *types.Dele
 	// error on lookup?
 	if sr.Err() != nil {
 		// may be ErrNoDocuments, which we seek
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			return false
 		}
 

@@ -117,27 +117,17 @@ func (token *ERC20Token) Allowance(args *struct {
 	return a
 }
 
-// LogoURL resolves an URL of the token logo.
+// LogoURL resolves a URL of the token logo.
 func (token *ERC20Token) LogoURL() string {
 	return repository.R().Erc20LogoURL(&token.Address)
 }
 
 // TotalDeposit represents the total amount of tokens deposited to fMint as collateral.
 func (token *ERC20Token) TotalDeposit() hexutil.Big {
-	d, err := repository.R().FMintTokenTotalBalance(&token.Address, types.DefiTokenTypeCollateral)
-	if err != nil {
-		log.Errorf("unknown deposit of %s; %s", token.Address.String(), err.Error())
-		return hexutil.Big{}
-	}
-	return d
+	return hexutil.Big{}
 }
 
 // TotalDebt represents the total amount of tokens borrowed/minted on fMint.
 func (token *ERC20Token) TotalDebt() hexutil.Big {
-	d, err := repository.R().FMintTokenTotalBalance(&token.Address, types.DefiTokenTypeDebt)
-	if err != nil {
-		log.Errorf("unknown debt of %s; %s", token.Address.String(), err.Error())
-		return hexutil.Big{}
-	}
-	return d
+	return hexutil.Big{}
 }

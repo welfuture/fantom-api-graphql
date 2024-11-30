@@ -3,6 +3,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"go.mongodb.org/mongo-driver/bson"
@@ -70,7 +71,7 @@ func (db *MongoDbBridge) LastKnownBlock() (uint64, error) {
 	}
 
 	// any unknown error?
-	if res.Err() != mongo.ErrNoDocuments {
+	if !errors.Is(res.Err(), mongo.ErrNoDocuments) {
 		db.log.Errorf("config collection record not found; %s", res.Err().Error())
 		return 0, res.Err()
 	}
@@ -91,7 +92,7 @@ func (db *MongoDbBridge) lastKnownBlock() (uint64, error) {
 	res := col.FindOne(context.Background(), bson.D{}, opt)
 	if res.Err() != nil {
 		// may be no block at all
-		if res.Err() == mongo.ErrNoDocuments {
+		if errors.Is(res.Err(), mongo.ErrNoDocuments) {
 			db.log.Info("no blocks found in database")
 			return 0, nil
 		}

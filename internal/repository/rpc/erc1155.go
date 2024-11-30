@@ -21,7 +21,7 @@ import (
 	"strings"
 )
 
-//go:generate tools/abigen.sh --abi ./contracts/abi/erc1155.abi --pkg contracts --type ERC1155 --out ./contracts/erc1155_token.go
+//go:generate tools/abigen.sh --abi ./contracts/abi/erc1155.json --pkg contracts --type ERC1155 --out ./contracts/erc1155_token.go
 
 // Erc1155Uri provides URI of Metadata JSON Schema of the ERC1155 token.
 func (ftm *FtmBridge) Erc1155Uri(token *common.Address, tokenId *big.Int) (string, error) {

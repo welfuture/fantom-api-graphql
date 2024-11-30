@@ -27,7 +27,7 @@ func (p *proxy) UpdateWithdrawRequest(wr *types.WithdrawRequest) error {
 	return p.db.UpdateWithdrawal(wr)
 }
 
-// WithdrawRequest extracts details of a withdraw request specified by the delegator, validator and request ID.
+// WithdrawRequest extracts details of a withdrawal request specified by the delegator, validator and request ID.
 func (p *proxy) WithdrawRequest(addr *common.Address, valID *hexutil.Big, reqID *hexutil.Big) (*types.WithdrawRequest, error) {
 	return p.db.Withdrawal(addr, valID, reqID)
 }

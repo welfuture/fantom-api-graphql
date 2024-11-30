@@ -3,6 +3,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fantom-api-graphql/internal/types"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -87,7 +88,7 @@ func (db *MongoDbBridge) BurnByBlock(bn hexutil.Uint64) (*types.FtmBurn, error) 
 	sr := col.FindOne(context.Background(), bson.D{{Key: "block", Value: bn}})
 	if sr.Err() != nil {
 		// if the burn has not been found, add this as a new one
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			return nil, nil
 		}
 
@@ -171,7 +172,7 @@ func (db *MongoDbBridge) BurnTotal() (int64, error) {
 	sr := col.FindOne(context.Background(), bson.D{{Key: "_id", Value: burnBaseAggregateDate}})
 	if sr.Err() != nil {
 		db.log.Criticalf("could not get burned total; %s", sr.Err().Error())
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			return 0, db.burnAddTotalAggregate()
 		}
 

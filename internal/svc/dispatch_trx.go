@@ -156,13 +156,6 @@ func (trd *trxDispatcher) process(evt *eventTrx) {
 	// store the transaction into the database once the processing is done
 	// we spawn a lot of go-routines here, so we should test the optimal queue length above
 	go trd.waitAndStore(evt, &wg)
-
-	// broadcast new transaction; if it can not be broadcast quickly, skip
-	select {
-	case trd.onTransaction <- evt.trx:
-	case <-time.After(200 * time.Millisecond):
-	case <-trd.sigStop:
-	}
 }
 
 // waitAndStore waits for the transaction processing to finish and stores the transaction into db.

@@ -65,7 +65,7 @@ func cacheConfig(cfg *config.Config, log logger.Logger) bigcache.Config {
 
 		// Interval between removing expired entries (clean up).
 		// If set to <= 0 then no action is performed.
-		// Setting to < 1 second is counterproductive — big cache has a one second resolution.
+		// Setting to < 1 second is counterproductive — big cache has a one-second resolution.
 		CleanWindow: 5 * time.Minute,
 
 		// rps * lifeWindow, used only in initial memory allocation

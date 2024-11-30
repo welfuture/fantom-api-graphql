@@ -10,18 +10,18 @@ import (
 type Cursor string
 
 // ImplementsGraphQLType notifies the GraphQL that this type resolves Cursor scalar.
-func (Cursor) ImplementsGraphQLType(name string) bool {
+func (c *Cursor) ImplementsGraphQLType(name string) bool {
 	return name == "Cursor"
 }
 
 // UnmarshalGraphQL unmarshal incoming Cursor into a local variable.
 func (c *Cursor) UnmarshalGraphQL(input interface{}) error {
 	var err error
-	switch input := input.(type) {
+	switch in := input.(type) {
 	case string:
-		*c = Cursor(input)
+		*c = Cursor(in)
 	case int32:
-		*c = Cursor(strconv.Itoa(int(input)))
+		*c = Cursor(strconv.Itoa(int(in)))
 	default:
 		err = errors.New("wrong cursor type")
 	}
@@ -29,6 +29,6 @@ func (c *Cursor) UnmarshalGraphQL(input interface{}) error {
 }
 
 // MarshalJSON encodes a cursor to JSON for transport.
-func (c Cursor) MarshalJSON() ([]byte, error) {
-	return strconv.AppendQuote(nil, string(c)), nil
+func (c *Cursor) MarshalJSON() ([]byte, error) {
+	return strconv.AppendQuote(nil, string(*c)), nil
 }

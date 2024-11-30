@@ -24,13 +24,13 @@ import (
 	"strings"
 )
 
-//go:generate tools/abigen.sh --abi ./contracts/abi/gov_governance.abi --pkg contracts --type Governance --out ./contracts/governance.go
-//go:generate tools/abigen.sh --abi ./contracts/abi/gov_iproposal.abi --pkg contracts --type GovernanceProposal --out ./contracts/gov_iproposal.go
-//go:generate tools/abigen.sh --abi ./contracts/abi/gov_governable.abi --pkg contracts --type Governable --out ./contracts/gov_governable.go
+//go:generate tools/abigen.sh --abi ./contracts/abi/gov_governance.json --pkg contracts --type Governance --out ./contracts/governance.go
+//go:generate tools/abigen.sh --abi ./contracts/abi/gov_iproposal.json --pkg contracts --type GovernanceProposal --out ./contracts/gov_iproposal.go
+//go:generate tools/abigen.sh --abi ./contracts/abi/gov_governable.json --pkg contracts --type Governable --out ./contracts/gov_governable.go
 
-// proposalExtended represents the extended information
+// GovProposalExtended represents the extended information
 // of a governance proposal.
-type govProposalExtended struct {
+type GovProposalExtended struct {
 	Name string
 	Desc string
 }
@@ -169,7 +169,7 @@ func govConvertScales(sc []*big.Int) []hexutil.Uint64 {
 
 // GovernanceProposalDetails provides a detail of Proposal of a governance contract
 // specified by its id.
-func (ftm *FtmBridge) GovernanceProposalDetails(prop *common.Address) (*govProposalExtended, error) {
+func (ftm *FtmBridge) GovernanceProposalDetails(prop *common.Address) (*GovProposalExtended, error) {
 	// get the proposal contract
 	pp, err := contracts.NewGovernanceProposal(*prop, ftm.eth)
 	if err != nil {
@@ -178,7 +178,7 @@ func (ftm *FtmBridge) GovernanceProposalDetails(prop *common.Address) (*govPropo
 	}
 
 	// prep the container
-	ge := govProposalExtended{}
+	ge := GovProposalExtended{}
 
 	// load the name
 	ge.Name, err = pp.Name(nil)

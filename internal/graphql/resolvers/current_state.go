@@ -61,7 +61,7 @@ func (cst CurrentState) SfcContractAddress() common.Address {
 
 // SfcLockingEnabled indicates if the stake locking has been enabled in SFC contract.
 func (cst CurrentState) SfcLockingEnabled() (bool, error) {
-	return repository.R().LockingAllowed()
+	return false, nil
 }
 
 // SfcVersion resolves the current version of the SFC contract on the connected node.

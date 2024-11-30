@@ -24,7 +24,7 @@ func defaultConfigDir() string {
 	case "windows":
 		return filepath.Join(home, "FantomApi")
 	default:
-		return filepath.Join(home, ".fantomapi")
+		return filepath.Join(home, ".api")
 	}
 }
 

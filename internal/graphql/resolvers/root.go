@@ -5,8 +5,6 @@ import (
 	"fantom-api-graphql/cmd/apiserver/build"
 	"fantom-api-graphql/internal/config"
 	"fantom-api-graphql/internal/logger"
-	"fantom-api-graphql/internal/svc"
-	"fantom-api-graphql/internal/types"
 	"fmt"
 	"golang.org/x/sync/singleflight"
 	"sync"
@@ -20,7 +18,7 @@ const (
 	subscriptionInitialCapacity = 100
 
 	// listMaxEdgesPerRequest maximal number of edges end-client can request in one query.
-	listMaxEdgesPerRequest uint32 = 250
+	listMaxEdgesPerRequest uint32 = 100
 )
 
 // rootResolver represents the ApiResolver implementation.
@@ -29,18 +27,6 @@ type rootResolver struct {
 	wg      sync.WaitGroup
 	cg      singleflight.Group
 	sigStop chan bool
-
-	// blocks subscriptions management
-	subscribeOnBlock   chan *subscriptOnBlock
-	unsubscribeOnBlock chan string
-	blockSubscribers   map[string]*subscriptOnBlock
-	onBlockEvents      chan *types.Block
-
-	// transaction subscriptions management
-	subscribeOnTrx   chan *subscriptOnTrx
-	unsubscribeOnTrx chan string
-	trxSubscribers   map[string]*subscriptOnTrx
-	onTrxEvents      chan *types.Transaction
 }
 
 // log represents the logger to be used by the repository.
@@ -73,27 +59,8 @@ func New() ApiResolver {
 
 	// create new resolver
 	rs := rootResolver{
-		// create terminator
 		sigStop: make(chan bool, 1),
-
-		// block events subscription basics
-		subscribeOnBlock:   make(chan *subscriptOnBlock, subscriptionQueueCapacity),
-		unsubscribeOnBlock: make(chan string, subscriptionQueueCapacity),
-		blockSubscribers:   make(map[string]*subscriptOnBlock, subscriptionInitialCapacity),
-		onBlockEvents:      make(chan *types.Block, onBlockChannelCapacity),
-
-		// block events subscription basics
-		subscribeOnTrx:   make(chan *subscriptOnTrx, subscriptionQueueCapacity),
-		unsubscribeOnTrx: make(chan string, subscriptionQueueCapacity),
-		trxSubscribers:   make(map[string]*subscriptOnTrx, subscriptionInitialCapacity),
-		onTrxEvents:      make(chan *types.Transaction, onBlockChannelCapacity),
 	}
-
-	// pass subscription data source channels to the service manager
-	// to get them filled with relevant data
-	sm := svc.Manager()
-	sm.SetBlockChannel(rs.onBlockEvents)
-	sm.SetTrxChannel(rs.onTrxEvents)
 
 	// handle broadcast and subscriptions in a separate routine
 	rs.wg.Add(1)
@@ -123,32 +90,7 @@ func (rs *rootResolver) run() {
 
 	// log action
 	log.Notice("GraphQL resolver started")
-
-	// main loop waits for data on any channel and act upon it
-	for {
-		select {
-		case <-rs.sigStop:
-			return
-
-		case id := <-rs.unsubscribeOnBlock:
-			delete(rs.blockSubscribers, id)
-
-		case id := <-rs.unsubscribeOnTrx:
-			delete(rs.trxSubscribers, id)
-
-		case sub := <-rs.subscribeOnBlock:
-			rs.addBlockSubscriber(sub)
-
-		case sub := <-rs.subscribeOnTrx:
-			rs.addTrxSubscriber(sub)
-
-		case evt := <-rs.onBlockEvents:
-			rs.dispatchOnBlock(evt)
-
-		case evt := <-rs.onTrxEvents:
-			rs.dispatchOnTransaction(evt)
-		}
-	}
+	<-rs.sigStop
 }
 
 // listLimitCount enforces maximum size of a requested list to given limit

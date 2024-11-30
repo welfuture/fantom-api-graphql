@@ -91,7 +91,7 @@ func (p *proxy) getBlock(tag string, pull func(*string) (*types.Block, error)) (
 	blk, err := pull(&tag)
 	if err != nil {
 		// block simply not found?
-		if err == eth.ErrNoResult {
+		if errors.Is(err, eth.ErrNoResult) {
 			p.log.Warning("block not found in the blockchain")
 			return nil, ErrBlockNotFound
 		}
@@ -121,7 +121,7 @@ func (p *proxy) blockByTag(tag *string) (*types.Block, error) {
 	block, err := p.rpc.Block(tag)
 	if err != nil {
 		// block simply not found?
-		if err == eth.ErrNoResult {
+		if errors.Is(err, eth.ErrNoResult) {
 			p.log.Warning("block not found in the blockchain")
 			return nil, ErrBlockNotFound
 		}
@@ -227,8 +227,8 @@ func checkBlocksListBoundary(count int32, next *types.Block, list *types.BlockLi
 // If the initial block number is not provided, we start on top, or bottom based on count value.
 //
 // No-number boundaries are handled as follows:
-// 	- For positive count we start from the most recent block and scan to older blocks.
-// 	- For negative count we start from the first block and scan to newer blocks.
+//   - For positive count we start from the most recent block and scan to older blocks.
+//   - For negative count we start from the first block and scan to newer blocks.
 func (p *proxy) Blocks(num *uint64, count int32) (*types.BlockList, error) {
 	// nothing to load?
 	if count == 0 {

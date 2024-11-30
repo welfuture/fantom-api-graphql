@@ -3,6 +3,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fantom-api-graphql/internal/types"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -48,7 +49,7 @@ func (db *MongoDbBridge) initContractsCollection(col *mongo.Collection) {
 		db.log.Panicf("can not create indexes for contracts collection; %s", err.Error())
 	}
 
-	// log we done that
+	// log we've done that
 	db.log.Debugf("contracts collection initialized")
 }
 
@@ -137,7 +138,7 @@ func (db *MongoDbBridge) isContractKnown(col *mongo.Collection, addr *common.Add
 	// error on lookup?
 	if sr.Err() != nil {
 		// may be ErrNoDocuments, which we seek
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			return false, nil
 		}
 
@@ -179,7 +180,7 @@ func (db *MongoDbBridge) Contract(addr *common.Address) (*types.Contract, error)
 	// error on lookup?
 	if sr.Err() != nil {
 		// may be ErrNoDocuments, which we seek
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			return nil, nil
 		}
 

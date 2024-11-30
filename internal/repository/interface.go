@@ -10,12 +10,8 @@ package repository
 
 import (
 	"fantom-api-graphql/internal/config"
-	"fantom-api-graphql/internal/repository/p2p"
-	"fantom-api-graphql/internal/repository/rpc/contracts"
 	"fantom-api-graphql/internal/types"
-	"github.com/ethereum/go-ethereum/p2p/enode"
 	"math/big"
-	"net"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -136,9 +132,6 @@ type Repository interface {
 	// RewardsAllowed returns the reward lock status from SFC.
 	RewardsAllowed() (bool, error)
 
-	// LockingAllowed indicates if the stake locking has been enabled in SFC.
-	LockingAllowed() (bool, error)
-
 	// IsSfcContract returns true if the given address points to the SFC contract.
 	IsSfcContract(*common.Address) bool
 
@@ -240,34 +233,8 @@ type Repository interface {
 	// DelegationsOfValidator extracts a list of delegations for a validator by its ID.
 	DelegationsOfValidator(*hexutil.Big, *string, int32) (*types.DelegationList, error)
 
-	// DelegationLock returns delegation lock information using SFC contract binding.
-	DelegationLock(*common.Address, *hexutil.Big) (*types.DelegationLock, error)
-
-	// DelegationUnlockPenalty returns the amount of penalty applied on given stake unlock.
-	DelegationUnlockPenalty(addr *common.Address, valID *big.Int, amount *big.Int) (hexutil.Big, error)
-
-	// DelegationAmountUnlocked returns delegation lock information using SFC contract binding.
-	DelegationAmountUnlocked(addr *common.Address, valID *big.Int) (hexutil.Big, error)
-
-	// StoreLockedDelegation stores the given locked delegation into the database.
-	StoreLockedDelegation(dl *types.LockedDelegation) error
-
-	// AdjustLockedDelegation reduces the given locked delegation by the give amount in the database.
-	AdjustLockedDelegation(common.Address, int64, int64) error
-
 	// PendingRewards returns a detail of pending rewards for the given delegation.
 	PendingRewards(*common.Address, *hexutil.Big) (*types.PendingRewards, error)
-
-	// DelegationOutstandingSFTM returns the amount of sFTM tokens for the delegation
-	// identified by the delegator address and the staker id.
-	DelegationOutstandingSFTM(*common.Address, *hexutil.Big) (*hexutil.Big, error)
-
-	// DelegationTokenizerUnlocked returns the status of SFC Tokenizer lock
-	// for a delegation identified by the address and staker id.
-	DelegationTokenizerUnlocked(*common.Address, *hexutil.Big) (bool, error)
-
-	// DelegationFluidStakingActive signals if the delegation is upgraded to Fluid Staking model.
-	DelegationFluidStakingActive(*common.Address, *hexutil.Big) (bool, error)
 
 	// StoreWithdrawRequest stores the given withdraw request in persistent storage.
 	StoreWithdrawRequest(*types.WithdrawRequest) error
@@ -275,7 +242,7 @@ type Repository interface {
 	// UpdateWithdrawRequest stores the updated withdraw request in persistent storage.
 	UpdateWithdrawRequest(*types.WithdrawRequest) error
 
-	// WithdrawRequest extracts details of a withdraw request specified by the delegator, validator and request ID.
+	// WithdrawRequest extracts details of a withdrawal request specified by the delegator, validator and request ID.
 	WithdrawRequest(*common.Address, *hexutil.Big, *hexutil.Big) (*types.WithdrawRequest, error)
 
 	// WithdrawRequests extracts a list of withdraw requests for the given address and validator.
@@ -315,127 +282,6 @@ type Repository interface {
 		Value *hexutil.Big
 		Data  *string
 	}) (*hexutil.Uint64, error)
-
-	// DefiConfiguration loads the current DeFi contract settings.
-	DefiConfiguration() (*types.DefiSettings, error)
-
-	// DefiTokens resolves list of DeFi tokens available for the DeFi functions.
-	DefiTokens() ([]types.DefiToken, error)
-
-	// DefiToken loads details of a single DeFi token by it's address.
-	DefiToken(*common.Address) (*types.DefiToken, error)
-
-	// DefiTokenPrice loads the current price of the given token
-	// from on-chain price oracle.
-	DefiTokenPrice(*common.Address) (hexutil.Big, error)
-
-	// FMintAccount loads details of a DeFi/fMint account identified by the owner address.
-	FMintAccount(common.Address) (*types.FMintAccount, error)
-
-	// FMintTokenBalance loads balance of a single DeFi token by it's address.
-	FMintTokenBalance(*common.Address, *common.Address, types.DefiTokenType) (hexutil.Big, error)
-
-	// FMintTokenTotalBalance loads total balance of a single DeFi token by it's address.
-	FMintTokenTotalBalance(*common.Address, types.DefiTokenType) (hexutil.Big, error)
-
-	// FMintTokenValue loads value of a single DeFi token by it's address in fUSD.
-	FMintTokenValue(*common.Address, *common.Address, types.DefiTokenType) (hexutil.Big, error)
-
-	// FMintRewardsEarned resolves the total amount of rewards
-	// accumulated on the account for the excessive collateral deposits.
-	FMintRewardsEarned(*common.Address) (hexutil.Big, error)
-
-	// FMintRewardsStashed represents the total amount of rewards
-	// accumulated on the account in stash.
-	FMintRewardsStashed(*common.Address) (hexutil.Big, error)
-
-	// FMintCanClaimRewards resolves the fMint account flag for being allowed
-	// to claim earned rewards.
-	FMintCanClaimRewards(*common.Address) (bool, error)
-
-	// FMintCanReceiveRewards resolves the fMint account flag for being eligible
-	// to receive earned rewards. If the collateral to debt ration drop below
-	// certain value, earned rewards are burned.
-	FMintCanReceiveRewards(*common.Address) (bool, error)
-
-	// FMintCanPushRewards signals if there are any rewards unlocked
-	// on the rewards' distribution contract and can be pushed to account.
-	FMintCanPushRewards() (bool, error)
-
-	// FMintUsers loads the list of fMint users and their associated tokens used for a specified purpose.
-	FMintUsers(int32) ([]*types.FMintUserTokens, error)
-
-	// AddFMintTransaction adds the specified fMint transaction to persistent storage.
-	AddFMintTransaction(*types.FMintTransaction) error
-
-	// UniswapPairs returns list of all token pairs managed by Uniswap core.
-	UniswapPairs() ([]common.Address, error)
-
-	// UniswapKnownPairs returns list of all known and recognized token pairs managed by Uniswap core.
-	UniswapKnownPairs() ([]common.Address, error)
-
-	// UniswapPair returns an address of an Uniswap pair for the given tokens.
-	UniswapPair(*common.Address, *common.Address) (*common.Address, error)
-
-	// UniswapAmountsOut resolves a list of output amounts for the given
-	// input amount and a list of tokens to be used to make the swap operation.
-	UniswapAmountsOut(amountIn hexutil.Big, tokens []common.Address) ([]hexutil.Big, error)
-
-	// UniswapAmountsIn resolves a list of input amounts for the given
-	// output amount and a list of tokens to be used to make the swap operation.
-	UniswapAmountsIn(amountOut hexutil.Big, tokens []common.Address) ([]hexutil.Big, error)
-
-	// UniswapQuoteInput calculates optimal input on sibling token based on input amount and
-	// self reserves of the analyzed token.
-	UniswapQuoteInput(amountIn hexutil.Big, reserveMy hexutil.Big, reserveSibling hexutil.Big) (hexutil.Big, error)
-
-	// UniswapTokens returns list of addresses of tokens involved in an Uniswap pair.
-	UniswapTokens(*common.Address) ([]common.Address, error)
-
-	// UniswapReserves returns list of token reserve amounts in a Uniswap pair.
-	UniswapReserves(*common.Address) ([]hexutil.Big, error)
-
-	// UniswapReservesTimeStamp returns the timestamp of the reserves of a Uniswap pair.
-	UniswapReservesTimeStamp(*common.Address) (hexutil.Uint64, error)
-
-	// UniswapCumulativePrices returns list of token cumulative prices of a Uniswap pair.
-	UniswapCumulativePrices(*common.Address) ([]hexutil.Big, error)
-
-	// UniswapLastKValue returns the last value of the pool control coefficient.
-	UniswapLastKValue(*common.Address) (hexutil.Big, error)
-
-	// UniswapPairContract returns instance of this contract according to given pair address
-	UniswapPairContract(*common.Address) (*contracts.UniswapPair, error)
-
-	// UniswapAdd adds a new incoming swap from blockchain to the repository.
-	UniswapAdd(*types.Swap) error
-
-	// LastKnownSwapBlock returns number of the last block known to the repository with swap event.
-	LastKnownSwapBlock() (uint64, error)
-
-	// UniswapUpdateLastKnownSwapBlock stores a last correctly saved swap block number into persistent storage.
-	UniswapUpdateLastKnownSwapBlock(blkNumber uint64) error
-
-	// UniswapFactoryContract returns an instance of an Uniswap factory
-	UniswapFactoryContract() (*contracts.UniswapFactory, error)
-
-	// UniswapVolume returns swap volume for specified uniswap pair
-	UniswapVolume(*common.Address, int64, int64) (types.DefiSwapVolume, error)
-
-	// UniswapTimeVolumes returns grouped volumes for specified pair, time and resolution
-	UniswapTimeVolumes(*common.Address, string, int64, int64) ([]types.DefiSwapVolume, error)
-
-	// UniswapTimePrices returns grouped prices for specified pair, time and resolution
-	UniswapTimePrices(*common.Address, string, int64, int64, int32) ([]types.DefiTimePrice, error)
-
-	// UniswapTimeReserves returns grouped reserves for specified pair, time and resolution
-	UniswapTimeReserves(*common.Address, string, int64, int64) ([]types.DefiTimeReserve, error)
-
-	// UniswapActions provides list of uniswap actions stored in the persistent db.
-	UniswapActions(*common.Address, *string, int32, int32) (*types.UniswapActionList, error)
-
-	// NativeTokenAddress returns address of the native token wrapper, if available.
-	NativeTokenAddress() (*common.Address, error)
 
 	// TokenTransactions provides list of ERC20/ERC721/ERC1155 transactions based on given filters.
 	TokenTransactions(tokenType string, token *common.Address, tokenId *big.Int, acc *common.Address, txType []int32, cursor *string, count int32) (*types.TokenTransactionList, error)
@@ -565,25 +411,6 @@ type Repository interface {
 	// in the governance contract identified by the address.
 	GovernanceTotalWeight(*common.Address) (hexutil.Big, error)
 
-	// FLendGetLendingPool resolves lending pool contract instance
-	// to be able to get calls and information from this contract
-	FLendGetLendingPool() (*contracts.ILendingPool, error)
-
-	// FLendGetLendingPoolReserveData resolves reserve data
-	// according to given address
-	FLendGetLendingPoolReserveData(*common.Address) (*types.ReserveData, error)
-
-	// FLendGetUserAccountData resolves user account data for
-	// specified address
-	FLendGetUserAccountData(*common.Address) (*types.FLendUserAccountData, error)
-
-	// FLendGetReserveList resolves list of reserves in lending pool
-	FLendGetReserveList() ([]common.Address, error)
-
-	// FLendGetUserDepositHistory resolves deposit history
-	// data for specified user and asset address
-	FLendGetUserDepositHistory(*common.Address, *common.Address) ([]*types.FLendDeposit, error)
-
 	// TrxFlowVolume resolves the list of daily trx flow aggregations.
 	TrxFlowVolume(from *time.Time, to *time.Time) ([]*types.DailyTrxVolume, error)
 
@@ -622,37 +449,6 @@ type Repository interface {
 
 	// FeeFlow provides a list of fee flow aggregates for the given date range.
 	FeeFlow(from, to time.Time) ([]*types.FtmDailyBurn, error)
-
-	// NetworkNode returns instance of Opera network node record by its ID.
-	NetworkNode(nid enode.ID) (*types.OperaNode, error)
-
-	// StoreNetworkNode stores the given Opera node record in the persistent database.
-	StoreNetworkNode(node *types.OperaNode) error
-
-	// IsNetworkNodeKnown checks if the given network node is already registered in the persistent database.
-	IsNetworkNodeKnown(id enode.ID) bool
-
-	// NetworkNodeConfirmCheck confirms successful check of the given Opera network node.
-	NetworkNodeConfirmCheck(node *enode.Node, bhp p2p.BlockHeightProvider) (bool, error)
-
-	// NetworkNodeFailCheck registers failed check of the given Opera network node.
-	NetworkNodeFailCheck(node *enode.Node) error
-
-	// PeerInformation returns detailed information of the given peer, if it can be obtained.
-	PeerInformation(node *enode.Node, bhp p2p.BlockHeightProvider) (*types.OperaNodeInformation, error)
-
-	// NetworkNodeUpdateBatch provides a list of Opera network node addresses most suitable for status update
-	// based on the registered time of the latest check.
-	NetworkNodeUpdateBatch() ([]*enode.Node, error)
-
-	// NetworkNodeBootstrapSet provides a set of known nodes to be co-used to bootstrap new search.
-	NetworkNodeBootstrapSet() []*enode.Node
-
-	// GeoLocation provides geographic location information for the given IP address using GeoIP bridge.
-	GeoLocation(net.IP) (types.GeoLocation, error)
-
-	// NetworkNodesGeoAggregated provides a list of aggregated opera nodes based on given location detail level.
-	NetworkNodesGeoAggregated(level int) ([]*types.OperaNodeLocationAggregate, error)
 
 	// Close and cleanup the repository.
 	Close()

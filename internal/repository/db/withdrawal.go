@@ -3,6 +3,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fantom-api-graphql/internal/types"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -63,7 +64,7 @@ func (db *MongoDbBridge) Withdrawal(addr *common.Address, valID *hexutil.Big, re
 	})
 
 	// do we know the request?
-	if sr.Err() == mongo.ErrNoDocuments {
+	if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 		db.log.Errorf("withdraw request [%s] of %s to #%d not found", reqID.String(), addr.String(), valID.ToInt().Uint64())
 		return nil, sr.Err()
 	}
@@ -192,7 +193,7 @@ func (db *MongoDbBridge) UpdateWithdrawal(wr *types.WithdrawRequest) error {
 		pen = &p
 	}
 
-	// try to update a withdraw request by replacing it in the database
+	// try to update a withdrawal request by replacing it in the database
 	// we use request ID identify unique withdrawal
 	er, err := col.UpdateOne(context.Background(), bson.D{
 		{Key: types.FiWithdrawalAddress, Value: wr.Address.String()},
@@ -235,7 +236,7 @@ func (db *MongoDbBridge) isWithdrawalKnown(col *mongo.Collection, wr *types.With
 	// error on lookup?
 	if sr.Err() != nil {
 		// may be ErrNoDocuments, which we seek
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			return false
 		}
 
@@ -325,7 +326,7 @@ func (db *MongoDbBridge) wrListCollectRangeMarks(col *mongo.Collection, list *ty
 	}
 
 	// inform what we are about to do
-	db.log.Debugf("withdraw requests list initialized with PK %s", list.First)
+	db.log.Debugf("withdraw requests list initialized with PK %d", list.First)
 	return list, nil
 }
 

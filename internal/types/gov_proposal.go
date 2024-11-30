@@ -12,7 +12,7 @@ type GovernanceProposal struct {
 	// contract this Proposal belongs to.
 	GovernanceId common.Address
 
-	// Id represents the identifier of the Proposal in the Governance
+	// ID represents the identifier of the Proposal in the Governance
 	// contract managing the proposal.
 	Id hexutil.Big
 

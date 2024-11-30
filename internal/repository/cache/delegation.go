@@ -46,12 +46,12 @@ func (b *MemBridge) PushDelegation(dlg *types.Delegation) {
 	// encode account
 	data, err := dlg.MarshalBSON()
 	if err != nil {
-		b.log.Criticalf("can not marshal delegation of %s to #%d; %s", dlg.Address.String(), dlg.ToStakerId.ToInt().Uint64(), err.Error())
+		b.log.Criticalf("can not marshal delegation of %s to #%d; %s", dlg.Address.String(), dlg.ToValidatorID.ToInt().Uint64(), err.Error())
 		return
 	}
 
 	// set the data to cache by block number
-	if err := b.cache.Set(delegationCacheKey(dlg.Address, dlg.ToStakerId), data); err != nil {
-		b.log.Criticalf("can not cache delegation of %s to #%d; %s", dlg.Address.String(), dlg.ToStakerId.ToInt().Uint64(), err.Error())
+	if err := b.cache.Set(delegationCacheKey(dlg.Address, dlg.ToValidatorID), data); err != nil {
+		b.log.Criticalf("can not cache delegation of %s to #%d; %s", dlg.Address.String(), dlg.ToValidatorID.ToInt().Uint64(), err.Error())
 	}
 }

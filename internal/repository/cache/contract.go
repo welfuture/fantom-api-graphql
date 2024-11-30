@@ -2,6 +2,7 @@
 package cache
 
 import (
+	"errors"
 	"fantom-api-graphql/internal/types"
 	"fmt"
 	"github.com/allegro/bigcache"
@@ -71,7 +72,7 @@ func (b *MemBridge) EvictContract(addr *common.Address) {
 
 	// delete the record, if the is any
 	err := b.cache.Delete(contractId(addr))
-	if err != nil && err != bigcache.ErrEntryNotFound {
+	if err != nil && !errors.Is(err, bigcache.ErrEntryNotFound) {
 		b.log.Criticalf("cache error %s", err.Error())
 	}
 }

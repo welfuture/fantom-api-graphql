@@ -9,7 +9,7 @@ import (
 // Default values of configuration options
 const (
 	// this defines default application name
-	defApplicationName = "FantomAPI"
+	defApplicationName = "SonicAPI"
 
 	// defSelfAddress is a default address used as a placeholder
 	// for actual API server identification.
@@ -56,9 +56,6 @@ const (
 	// defCacheMax size represents the default max size of the cache in MB
 	defCacheMaxSize = 4096
 
-	// defSolCompilerPath represents the default SOL compiler path
-	defSolCompilerPath = "/usr/bin/solc"
-
 	// defApiStateOrigin represents the default origin used for API state syncing
 	defApiStateOrigin = "https://localhost"
 
@@ -67,15 +64,6 @@ const (
 
 	// defStiContract holds deployment address of the Staker Info smart contract.
 	defStiContract = "0x92ffad75b8a942d149621a39502cdd8ad1dd57b4"
-
-	// defDefiFMintAddressProvider represents the address of the fMintAddressProvider
-	defDefiFMintAddressProvider = "0x730e27f6c52d07b1a6ab39b639b617dc566c91af"
-
-	// defDefiFMintAddressProvider represents the address of the fMintAddressProvider
-	defDefiUniswapCore = EmptyAddress
-
-	// defDefiFMintAddressProvider represents the address of the fMintAddressProvider
-	defDefiUniswapRouter = EmptyAddress
 
 	// defTokenLogoFilePath represents the default path to the tokens map file
 	defTokenLogoFilePath = "tokens.json"
@@ -111,7 +99,6 @@ func applyDefaults(cfg *viper.Viper) {
 	cfg.SetDefault(keyLachesisUrl, defLachesisUrl)
 	cfg.SetDefault(keyMongoUrl, defMongoUrl)
 	cfg.SetDefault(keyMongoDatabase, defMongoDatabase)
-	cfg.SetDefault(keySolCompilerPath, defSolCompilerPath)
 	cfg.SetDefault(keyApiPeers, defApiPeers)
 	cfg.SetDefault(keyApiStateOrigin, defApiStateOrigin)
 	cfg.SetDefault(keyErc20TokenMapFilePath, defTokenLogoFilePath)
@@ -139,11 +126,6 @@ func applyDefaults(cfg *viper.Viper) {
 	cfg.SetDefault(keyStakingStiContract, defStiContract)
 	cfg.SetDefault(keyStakingTokenizerContract, EmptyAddress)
 	cfg.SetDefault(keyStakingERC20Token, EmptyAddress)
-
-	// DeFi configuration
-	cfg.SetDefault(keyDefiFMintAddressProvider, defDefiFMintAddressProvider)
-	cfg.SetDefault(keyDefiUniswapCore, defDefiUniswapCore)
-	cfg.SetDefault(keyDefiUniswapRouter, defDefiUniswapRouter)
 
 	// P2P defaults
 	cfg.SetDefault(keyP2PBindUDP, "0.0.0.0:19173")

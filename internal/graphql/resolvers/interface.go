@@ -2,7 +2,6 @@
 package resolvers
 
 import (
-	"context"
 	"fantom-api-graphql/internal/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -60,13 +59,7 @@ type ApiResolver interface {
 		Cursor *Cursor
 		Count  int32
 	}) (*TransactionList, error)
-
-	// OnBlock resolves subscription to new blocks' event broadcast.
-	OnBlock(ctx context.Context) <-chan *Block
-
-	// OnTransaction resolves subscription to new transactions' event broadcast.
-	OnTransaction(ctx context.Context) <-chan *Transaction
-
+	
 	// CurrentEpoch resolves id of the current epoch.
 	CurrentEpoch() (hexutil.Uint64, error)
 
@@ -140,46 +133,6 @@ type ApiResolver interface {
 
 	// SendTransaction sends raw signed and RLP encoded transaction to the blockchain.
 	SendTransaction(*struct{ Tx hexutil.Bytes }) (*Transaction, error)
-
-	// DefiConfiguration resolves the current DeFi contract settings.
-	DefiConfiguration() (*DefiConfiguration, error)
-
-	// DefiTokens resolves list of DeFi tokens available for the DeFi functions.
-	DefiTokens() ([]*DefiToken, error)
-
-	// DefiUniswapPairs resolves a list of all pairs managed by the Uniswap core.
-	DefiUniswapPairs() []*UniswapPair
-
-	// DefiUniswapAmountsOut resolves a list of output amounts for the given
-	// input amount and a list of tokens to be used to make the swap operation.
-	DefiUniswapAmountsOut(*struct {
-		AmountIn hexutil.Big
-		Tokens   []common.Address
-	}) ([]hexutil.Big, error)
-
-	// DefiUniswapAmountsIn resolves a list of input amounts for the given
-	// output amount and a list of tokens to be used to make the swap operation.
-	DefiUniswapAmountsIn(*struct {
-		AmountOut hexutil.Big
-		Tokens    []common.Address
-	}) ([]hexutil.Big, error)
-
-	// DefiUniswapQuoteLiquidity resolves a list of optimal amounts of tokens
-	// to be added to both sides of a pair on addLiquidity call.
-	DefiUniswapQuoteLiquidity(*struct {
-		Tokens    []common.Address
-		AmountsIn []hexutil.Big
-	}) ([]hexutil.Big, error)
-
-	// FMintAccount resolves details of a specified DeFi account.
-	FMintAccount(*struct{ Owner common.Address }) (*FMintAccount, error)
-
-	// FMintTokenAllowance resolves the amount of ERC20 tokens unlocked
-	// by the token owner for DeFi/fMint protocol operations.
-	FMintTokenAllowance(args *struct {
-		Owner common.Address
-		Token common.Address
-	}) hexutil.Big
 
 	// Erc20Token resolves an instance of ERC20 token if available.
 	Erc20Token(*struct{ Token common.Address }) *ERC20Token

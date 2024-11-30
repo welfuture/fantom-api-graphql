@@ -48,8 +48,6 @@ func (b *MemBridge) PullSfcConfig() *types.SfcConfig {
 	val := types.SfcConfig{
 		MinValidatorStake:      hexutil.Big{},
 		MaxDelegatedRatio:      hexutil.Big{},
-		MinLockupDuration:      hexutil.Big{},
-		MaxLockupDuration:      hexutil.Big{},
 		WithdrawalPeriodEpochs: hexutil.Big{},
 		WithdrawalPeriodTime:   hexutil.Big{},
 	}

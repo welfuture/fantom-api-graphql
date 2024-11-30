@@ -18,8 +18,8 @@ const (
 // testAddress represents an address used to test an account reference
 var testAddress = common.HexToAddress("0xabc00FA001230012300aBc0012300Fa00FACE000")
 
-var erc721InterfaceId  = [4]byte { 0x80, 0xac, 0x58, 0xcd } // ERC-721: 0x80ac58cd
-var erc1155InterfaceId = [4]byte { 0xd9, 0xb6, 0x7a, 0x26 } // ERC-1155: 0xd9b67a26
+var erc721InterfaceId = [4]byte{0x80, 0xac, 0x58, 0xcd}  // ERC-721: 0x80ac58cd
+var erc1155InterfaceId = [4]byte{0xd9, 0xb6, 0x7a, 0x26} // ERC-1155: 0xd9b67a26
 
 // accDispatcher implements account dispatcher queue
 type accDispatcher struct {
@@ -169,7 +169,6 @@ func (acd *accDispatcher) processContract(acc *eventAcc) error {
 
 // detectContract tries to identify the contract type.
 func (acd *accDispatcher) detectContract(addr *common.Address, block *types.Block, trx *types.Transaction) (*types.Contract, string, error) {
-
 	isErc1155, err := repo.Erc165SupportsInterface(addr, erc1155InterfaceId)
 	if err == nil && isErc1155 {
 		log.Noticef("ERC1155 multi-token detected at %s", addr.String())
@@ -192,7 +191,7 @@ func (acd *accDispatcher) detectContract(addr *common.Address, block *types.Bloc
 	}
 
 	// log that the detection failed
-	log.Noticef("unknown contract at %s", addr.String())
+	log.Debugf("unknown contract at %s", addr.String())
 
 	// set as generic contract type if no other has been detected
 	return types.NewGenericContract(addr, block, trx), types.AccountTypeContract, nil

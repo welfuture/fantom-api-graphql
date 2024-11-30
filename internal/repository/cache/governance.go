@@ -15,7 +15,7 @@ const (
 // for the given governance total weight value.
 func getGovernanceTotalWeightKey(addr *common.Address) string {
 	var sb strings.Builder
-	// add the prefix and than the address
+	// add the prefix and then the address
 	sb.WriteString(governanceTotalWeightPrefix)
 	sb.WriteString(addr.String())
 

@@ -2,7 +2,6 @@
 schema {
     query: Query
     mutation: Mutation
-    subscription: Subscription
 }
 
 # Entry points for querying the API
@@ -123,91 +122,10 @@ type Query {
     # the total amount of collected rewards is being presented.
     sfcRewardsCollectedAmount(delegator: Address, staker: BigInt, since: Long, until: Long): BigInt!
 
-    # defiConfiguration exposes the current DeFi contract setup.
-    defiConfiguration:DefiSettings!
-
-    # defiTokens represents a list of all available DeFi tokens.
-    defiTokens:[DefiToken!]!
-
     # defiNativeToken represents the information about the native token
     # wrapper ERC20 contract. Returns NULL if the native token wrapper
     # is not available.
     defiNativeToken: ERC20Token
-
-    # fMintAccount provides DeFi/fMint information about an account on fMint protocol.
-    fMintAccount(owner: Address!):FMintAccount!
-
-    # fMintTokenAllowance resolves the amount of ERC20 tokens unlocked
-    # by the token owner for DeFi/fMint operations.
-    fMintTokenAllowance(owner: Address!, token: Address!):BigInt!
-
-    # fMintUserTokens resolves a list of pairs of fMint users and their tokens
-    # used for a specified purpose.
-    fMintUserTokens(purpose:FMintUserTokenPurpose=FMINT_COLLATERAL):[FMintUserToken!]!
-
-    # defiUniswapPairs represents a list of all pairs managed
-    # by the Uniswap Core contract on Opera blockchain.
-    defiUniswapPairs: [UniswapPair!]!
-
-    # defiUniswapAmountsOut calculates the expected output amounts
-    # required to finalize a swap operation specified by a list of
-    # tokens involved in the swap steps and the input amount.
-    # At least two addresses of tokens must be given
-    # for the calculation to succeed.
-    defiUniswapAmountsOut(amountIn: BigInt!, tokens:[Address!]!): [BigInt!]!
-
-    # defiUniswapAmountsIn calculates the expected input amounts
-    # required to finalize a swap operation specified by a list of
-    # tokens involved in the swap steps and the output amount.
-    # At least two addresses of tokens must be given
-    # for the calculation to succeed.
-    defiUniswapAmountsIn(amountOut: BigInt!, tokens:[Address!]!): [BigInt!]!
-
-    # defiUniswapQuoteLiquidity calculates optimal amount of tokens
-    # of an Uniswap pair defined by a pair of tokens for the given amount
-    # of both tokens desired to be added to the liquidity pool.
-    # The function can be used to calculate minimal amount of tokens expected
-    # to be added to the pool on both sides on addLiquidity call.
-    # Please note "amountsIn" must be in the same order as are the tokens.
-    defiUniswapQuoteLiquidity(tokens:[Address!]!, amountsIn:[BigInt!]!): [BigInt!]!
-
-    # defiUniswapVolumes represents a list of pairs and their historical values
-    # of traded volumes
-    defiUniswapVolumes:[DefiUniswapVolume!]!
-
-    # defiTimeVolumes returns volumes for specified pair, time resolution and interval.
-    # Address is pair address and is mandatory.
-    # Resolution can be {month, day, 4h, 1h, 30m 15m, 5m, 1m}, is optional, default is a day.
-    # Dates are in unix UTC number and are optional. When not provided
-    # then it takes period for last month till now.
-    defiTimeVolumes(address:Address!, resolution:String, fromDate:Int, toDate:Int):[DefiTimeVolume!]!
-
-    # defiTimePrices returns prices for specified pair, time resolution and interval.
-    # Address is pair address and is mandatory.
-    # Resolution can be {month, day, 4h, 1h, 30m 15m, 5m, 1m}, is optional, default is a day.
-    # Direction specifies price calculation, default 0 is for TokenA/TokenB otherwise TokenB/TokenA
-    # Dates are in unix UTC number and are optional. When not provided
-    # then it takes period for last month till now.
-    defiTimePrices(address:Address!, resolution:String, fromDate:Int, toDate:Int, direction:Int):[DefiTimePrice!]!
-
-    # defiTimeReserves returns reserves for specified pair, time resolution and interval.
-    # Address is pair address and is mandatory.
-    # Resolution can be {month, day, 4h, 1h, 30m 15m, 5m, 1m}, is optional, default is a day.
-    # Dates are in unix UTC number and are optional. When not provided
-    # then it takes period for last month till now.
-    defiTimeReserves(address:Address!, resolution:String, fromDate:Int, toDate:Int):[DefiTimeReserve!]!
-
-    # Get list of Uniswap actions with at most <count> edges.
-    # If <count> is positive, return edges after the cursor,
-    # if negative, return edges before the cursor.
-    # For undefined cursor, positive <count> starts the list from top,
-    # negative <count> starts the list from bottom.
-    # Address can be used for specifying actions for one Uniswap pair.
-    # ActionType represents action type:
-    # 0 - swap,
-    # 1 - mint,
-    # 2 - burn,
-    defiUniswapActions(pairAddress:Address, cursor:Cursor, count:Int!, actionType:Int):UniswapActionList!
 
     # erc20Token provides the information about an ERC20 token specified by it's
     # address, if available. The resolver returns NULL if the token does not exist.
@@ -254,9 +172,6 @@ type Query {
     # govProposals represents list of joined proposals across all the Governance contracts.
     govProposals(cursor:Cursor, count:Int!, activeOnly: Boolean = false):GovernanceProposalList!
 
-    # fLendLendingPool represents an instance of an fLend Lending pool
-    fLendLendingPool: LendingPool!
-
     # trxVolume provides a list of daily aggregations of the network transaction flow.
     # If boundaries are not defined, last 90 days of aggregated trx flow is provided.
     # Boundaries are defined in format YYYY-MM-DD, i.e. 2021-01-23 for January 23rd, 2021.
@@ -301,9 +216,6 @@ type Query {
     # ftmTreasuryTotalAmount provides the total amount of native FTM tokens sent into treasury
     # by the chain from paid transaction fees in FTM units.
     ftmTreasuryTotalAmount: Float!
-
-    # networkNodesAggregated provides an aggregated list of network nodes on the Opera network.
-    networkNodesAggregated(level: NetworkNodeGroupLevel = COUNTRY): NetworkNodeGroupList!
 }
 
 # Mutation endpoints for modifying the data
@@ -311,20 +223,4 @@ type Mutation {
     # SendTransaction submits a raw signed transaction into the block chain.
     # The tx parameter represents raw signed and RLP encoded transaction data.
     sendTransaction(tx: Bytes!):Transaction
-
-    # Validate a deployed contract byte code with the provided source code
-    # so potential users can check the contract source code, access contract ABI
-    # to be able to interact with the contract and get the right metadata.
-    # Returns updated contract information. If the contract can not be validated,
-    # it raises a GraphQL error.
-    validateContract(contract: ContractValidationInput!): Contract!
-}
-
-# Subscriptions to live events broadcasting
-type Subscription {
-    # Subscribe to receive information about new blocks in the blockchain.
-    onBlock: Block!
-
-    # Subscribe to receive information about new transactions in the blockchain.
-    onTransaction: Transaction!
 }

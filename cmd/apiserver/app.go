@@ -117,17 +117,13 @@ func (app *apiServer) setupHandlers(mux *http.ServeMux) {
 		"Service timeout.",
 	)
 
-	mux.Handle("/api", h)
-	mux.Handle("/graphql", h)
-
 	// setup gas price estimator REST API resolver
 	mux.Handle("/json/gas", handlers.GasPrice(app.log))
 	mux.Handle("/html/validators/down", handlers.ValidatorsDownHandler(app.log))
 
-	// handle GraphiQL interface
-	mux.Handle("/graphi", handlers.GraphiHandler(app.cfg.Server.DomainAddress, app.log))
-
 	// default root is the GraphQL
+	mux.Handle("/graphql", h)
+	mux.Handle("/api", h)
 	mux.Handle("/", h)
 }
 

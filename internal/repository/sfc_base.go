@@ -40,8 +40,6 @@ func (p *proxy) SfcConfiguration() (*types.SfcConfig, error) {
 		c = &types.SfcConfig{
 			MinValidatorStake:      p.pullSfcConfigValue(p.rpc.SfcMinValidatorStake),
 			MaxDelegatedRatio:      p.pullSfcConfigValue(p.rpc.SfcMaxDelegatedRatio),
-			MinLockupDuration:      p.pullSfcConfigValue(p.rpc.SfcMinLockupDuration),
-			MaxLockupDuration:      p.pullSfcConfigValue(p.rpc.SfcMaxLockupDuration),
 			WithdrawalPeriodEpochs: p.pullSfcConfigValue(p.rpc.SfcWithdrawalPeriodEpochs),
 			WithdrawalPeriodTime:   p.pullSfcConfigValue(p.rpc.SfcWithdrawalPeriodTime),
 		}
@@ -154,11 +152,6 @@ func (p *proxy) TotalStaked() (*hexutil.Big, error) {
 // RewardsAllowed returns the reward lock status from SFC.
 func (p *proxy) RewardsAllowed() (bool, error) {
 	return p.rpc.RewardsAllowed()
-}
-
-// LockingAllowed indicates if the stake locking has been enabled in SFC.
-func (p *proxy) LockingAllowed() (bool, error) {
-	return p.rpc.LockingAllowed()
 }
 
 // IsSfcContract returns true if the given address points to the SFC contract.

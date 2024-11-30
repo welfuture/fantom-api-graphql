@@ -3,6 +3,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fantom-api-graphql/internal/types"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -81,7 +82,7 @@ func (db *MongoDbBridge) isErcTransactionKnown(col *mongo.Collection, trx *types
 	// error on lookup?
 	if sr.Err() != nil {
 		// may be ErrNoDocuments, which we seek
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			return false
 		}
 		// inform that we can not get the PK; should not happen
@@ -358,6 +359,10 @@ func (db *MongoDbBridge) TokenTransactionsByCall(trxHash *common.Hash) ([]*types
 		bson.D{{Key: types.FiTokenTransactionCallHash, Value: trxHash.String()}},
 		options.Find().SetSort(bson.D{{Key: types.FiTokenTransactionOrdinal, Value: -1}}),
 	)
+	if err != nil {
+		db.log.Errorf("can not find erc transactions by call hash; %s", err.Error())
+		return nil, err
+	}
 
 	defer db.closeCursor(ld)
 

@@ -22,10 +22,7 @@ type IndexList struct {
 // updateDatabaseIndexes checks for indexes existence; if an expected index is not found, it creates it.
 func (db *MongoDbBridge) updateDatabaseIndexes() {
 	// define index list loaders
-	var ixLoaders = map[string]indexListProvider{
-		colNetworkNodes:      operaNodeCollectionIndexes,
-		colLockedDelegations: lockedDelegationsIndexes,
-	}
+	var ixLoaders = map[string]indexListProvider{}
 
 	// the DB bridge needs a way to terminate this thread
 	sig := make(chan bool, 1)

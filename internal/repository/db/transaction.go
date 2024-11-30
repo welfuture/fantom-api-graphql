@@ -3,6 +3,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fantom-api-graphql/internal/types"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -175,7 +176,7 @@ func (db *MongoDbBridge) IsTransactionKnown(col *mongo.Collection, hash *common.
 	// error on lookup?
 	if sr.Err() != nil {
 		// may be ErrNoDocuments, which we seek
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			// add transaction to the db
 			db.log.Debugf("transaction %s not found in database", hash.String())
 			return false, nil
@@ -270,7 +271,7 @@ func (db *MongoDbBridge) trxListWithRangeMarks(
 }
 
 // findBorderOrdinalIndex finds the highest, or lowest ordinal index in the collection.
-// For negative sort it will return highest and for positive sort it will return lowest available value.
+// For negative sort it will return highest and for positive sort it will return the lowest available value.
 func (db *MongoDbBridge) findBorderOrdinalIndex(col *mongo.Collection, filter bson.D, opt *options.FindOneOptions) (uint64, error) {
 	// prep container
 	var row struct {

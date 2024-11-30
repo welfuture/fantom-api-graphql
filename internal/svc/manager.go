@@ -4,7 +4,6 @@ package svc
 import (
 	"fantom-api-graphql/internal/config"
 	"fantom-api-graphql/internal/repository"
-	"fantom-api-graphql/internal/types"
 	"fmt"
 	"sync"
 )
@@ -81,16 +80,6 @@ func (mgr *ServiceManager) Close() {
 	log.Notice("svc manager closed")
 }
 
-// SetBlockChannel registers a channel for notifying new block events.
-func (mgr *ServiceManager) SetBlockChannel(ch chan *types.Block) {
-	mgr.bld.onBlock = ch
-}
-
-// SetTrxChannel registers a channel for notifying new transaction events.
-func (mgr *ServiceManager) SetTrxChannel(ch chan *types.Transaction) {
-	mgr.trd.onTransaction = ch
-}
-
 // Init the svc manager.
 func (mgr *ServiceManager) init() {
 	// make the block dispatcher
@@ -130,9 +119,6 @@ func (mgr *ServiceManager) init() {
 
 	// make transaction flow monitor
 	mgr.svc = append(mgr.svc, &trxFlowMonitor{service: service{mgr: mgr}})
-
-	// make the network discovery
-	mgr.svc = append(mgr.svc, &netCrawler{service: service{mgr: mgr}})
 
 	// add orchestrator as the last service, so it can safely operate on all the other
 	mgr.ora = &orchestrator{service: service{mgr: mgr}}

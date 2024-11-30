@@ -26,13 +26,11 @@ const (
 	FiWithdrawalFinTrx      = "fin_trx"
 	FiWithdrawalFinTime     = "fin_time"
 
-	WithdrawTypeUndelegated     = "SFC3:Undelegated"
-	WithdrawTypeWithdrawRequest = "SFC1:WithdrawRequest"
-	WithdrawTypeDeactivatedDlg  = "SFC1:DeactivatedDelegation"
-	WithdrawTypeDeactivatedVal  = "SFC1:DeactivatedStake"
+	WithdrawTypeUndelegated    = "SFC4:Undelegated"
+	WithdrawTypeDeactivatedVal = "SFC4:DeactivatedStake"
 )
 
-// WithdrawRequest represents a withdraw request in Opera staking
+// WithdrawRequest represents a withdrawal request in Opera staking
 // SFC contract. When partial withdraw is requested either on staking or delegation,
 // this record is created in the SFC contract to track the withdrawal process.
 type WithdrawRequest struct {
@@ -73,7 +71,7 @@ type BsonWithdrawRequest struct {
 // so it can be stored in database as UINT64 without loosing too much data
 var WithdrawDecimalsCorrection = new(big.Int).SetUint64(1000000000)
 
-// OrdinalIndex returns an ordinal index of the withdraw request.
+// OrdinalIndex returns an ordinal index of the withdrawal request.
 func (wr *WithdrawRequest) OrdinalIndex() uint64 {
 	return (uint64(wr.CreatedTime)&0xFFFFFFFFFF)<<24 | (wr.StakerID.ToInt().Uint64()&0xFFF)<<12 | (binary.BigEndian.Uint64(wr.RequestTrx[:8]) & 0xFFF)
 }

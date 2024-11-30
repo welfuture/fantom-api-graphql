@@ -60,7 +60,7 @@ func (wr WithdrawRequest) Account() (*Account, error) {
 	return NewAccount(acc), nil
 }
 
-// Staker resolves the withdraw request staker detail, if available.
+// Staker resolves the withdrawal request staker detail, if available.
 func (wr WithdrawRequest) Staker() (*Staker, error) {
 	// get staker detail by the staker id
 	st, err := repository.R().Validator(wr.WithdrawRequest.StakerID)

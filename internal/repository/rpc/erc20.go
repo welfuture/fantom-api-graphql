@@ -20,8 +20,7 @@ import (
 	"math/big"
 )
 
-//go:generate tools/abigen.sh --abi ./contracts/abi/erc20.abi --pkg contracts --type ERCTwenty --out ./contracts/erc20_token.go
-//go:generate tools/abigen.sh --abi ./contracts/abi/wftm.abi --pkg contracts --type ErcWrappedFtm --out ./contracts/erc20wftm_token.go
+//go:generate tools/abigen.sh --abi ./contracts/abi/erc20.json --pkg contracts --type ERCTwenty --out ./contracts/erc20_token.go
 
 // Erc20Name provides information about the name of the ERC20 token.
 func (ftm *FtmBridge) Erc20Name(token *common.Address) (string, error) {
@@ -109,7 +108,7 @@ func (ftm *FtmBridge) Erc20BalanceOf(token *common.Address, owner *common.Addres
 	return hexutil.Big(*val), nil
 }
 
-// Erc20Allowance loads the current amount of ERC20 tokens unlocked for DeFi
+// Erc20Allowance loads the current amount of ERC20 tokens unlocked
 // contract by the token owner.
 func (ftm *FtmBridge) Erc20Allowance(token *common.Address, owner *common.Address, spender *common.Address) (hexutil.Big, error) {
 	// connect the contract
@@ -121,8 +120,7 @@ func (ftm *FtmBridge) Erc20Allowance(token *common.Address, owner *common.Addres
 
 	// no spender? use fMint address by default
 	if nil == spender {
-		addr := ftm.fMintCfg.mustContractAddress(fMintAddressMinter)
-		spender = &addr
+		return hexutil.Big{}, err
 	}
 
 	// get the amount of tokens allowed for DeFi
