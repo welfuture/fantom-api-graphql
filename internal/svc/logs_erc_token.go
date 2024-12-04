@@ -80,7 +80,7 @@ func handleErc1155TransferBatch(lr *types.LogRecord) {
 			log.Errorf("ERC1155 TransferBatch ids and values length differs - trx %s", lr.TxHash.String())
 		}
 		for i := range ids {
-			log.Infof("ERC1155 storing TransferBatch - trx %s - len %d", lr.TxHash.String(), len(ids))
+			log.Debugf("ERC1155 storing TransferBatch - trx %s - len %d", lr.TxHash.String(), len(ids))
 			storeTokenTransaction(lr, types.AccountTypeERC1155Contract, types.TokenTrxTypeTransfer, from, to, *values[i], *ids[i], uint16(i))
 		}
 		return

@@ -35,9 +35,6 @@ type Config struct {
 	// Cache configuration
 	Cache Cache `mapstructure:"cache"`
 
-	// Cache configuration
-	Compiler Compiler `mapstructure:"compiler"`
-
 	// Repository configuration
 	Repository Repository `mapstructure:"repository"`
 
@@ -128,7 +125,8 @@ type Compiler struct {
 
 // Repository represents the repository configuration.
 type Repository struct {
-	MonitorStakers bool `mapstructure:"stakers"`
+	MonitorStakers  bool   `mapstructure:"stakers"`
+	StiFallbackPath string `mapstructure:"sti_fallback_path"`
 }
 
 // Staking represents the PoS Staking module configuration.

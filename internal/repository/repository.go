@@ -9,13 +9,17 @@ results. BigCache for in-memory object storage to speed up loading of frequently
 package repository
 
 import (
+	"encoding/json"
 	"fantom-api-graphql/internal/config"
 	"fantom-api-graphql/internal/logger"
 	"fantom-api-graphql/internal/repository/cache"
 	"fantom-api-graphql/internal/repository/db"
 	"fantom-api-graphql/internal/repository/rpc"
+	"fantom-api-graphql/internal/types"
 	"fmt"
 	"golang.org/x/sync/singleflight"
+	"io"
+	"os"
 	"sync"
 )
 
@@ -71,9 +75,7 @@ type proxy struct {
 
 	// governance contracts reference
 	govContracts map[string]config.GovernanceContract
-
-	// smart contract compilers
-	solCompiler string
+	stiFallback  map[uint64]*types.StakerInfo
 }
 
 // newRepository creates new instance of Repository implementation, namely proxy structure.
@@ -102,9 +104,7 @@ func newRepository() Repository {
 
 		// get the map of governance contracts
 		govContracts: governanceContractsMap(cfg.Governance),
-
-		// keep reference to the SOL compiler
-		solCompiler: cfg.Compiler.DefaultSolCompilerPath,
+		stiFallback:  loadStiFallback(cfg.Repository.StiFallbackPath),
 	}
 
 	// return the proxy
@@ -122,6 +122,35 @@ func governanceContractsMap(cfg config.Governance) map[string]config.GovernanceC
 		res[gv.Address.String()] = gv
 	}
 	return res
+}
+
+// loadStiFallback loads pre-configured STI data from a give JSON file.
+func loadStiFallback(path string) map[uint64]*types.StakerInfo {
+	if path == "" {
+		return make(map[uint64]*types.StakerInfo)
+	}
+
+	log.Infof("loading sti fallback from %s", path)
+
+	f, err := os.Open(path)
+	if err != nil {
+		return make(map[uint64]*types.StakerInfo)
+	}
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
+
+	all, _ := io.ReadAll(f)
+
+	var list map[uint64]*types.StakerInfo
+	err = json.Unmarshal(all, &list)
+	if err != nil {
+		log.Criticalf("could not read the sti fallback; %s\n", err.Error())
+		return make(map[uint64]*types.StakerInfo)
+	}
+
+	log.Infof("loaded %d sti fallback records", len(list))
+	return list
 }
 
 // connect opens connections to the external sources we need.

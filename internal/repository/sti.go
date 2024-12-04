@@ -25,7 +25,7 @@ func (p *proxy) StoreStakerInfo(id *hexutil.Big, sti *types.StakerInfo) error {
 	// push to in-memory cache
 	err := p.cache.PushStakerInfo(id, sti)
 	if err != nil {
-		p.log.Error("staker info can net be kept")
+		p.log.Error("staker info can not be kept")
 		return err
 	}
 	return nil
@@ -33,7 +33,11 @@ func (p *proxy) StoreStakerInfo(id *hexutil.Big, sti *types.StakerInfo) error {
 
 // RetrieveStakerInfo gets staker information from in-memory if available.
 func (p *proxy) RetrieveStakerInfo(id *hexutil.Big) *types.StakerInfo {
-	return p.cache.PullStakerInfo(id)
+	info := p.cache.PullStakerInfo(id)
+	if info != nil {
+		return info
+	}
+	return p.stiFallback[id.ToInt().Uint64()]
 }
 
 // IsStiContract returns true if the given address points to the STI contract.

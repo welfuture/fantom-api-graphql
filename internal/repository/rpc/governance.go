@@ -310,7 +310,7 @@ func (ftm *FtmBridge) GovernanceProposalsBy(gov common.Address) ([]*types.Govern
 	}
 
 	// log what we do
-	ftm.log.Noticef("loading %d proposals of %s", maxProposalId.Uint64(), gov.String())
+	ftm.log.Debugf("loading %d proposals of %s", maxProposalId.Uint64(), gov.String())
 
 	// make the array; the maxProposalId starts with 1, so we need array for one less
 	result := make([]*types.GovernanceProposal, 0)

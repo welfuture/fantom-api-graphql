@@ -46,14 +46,14 @@ func (p *proxy) loadErc721ContractDetails(token *types.Erc721Contract) (*types.E
 	// get the name (ignore fail - name is optional in ERC721)
 	token.Name, err = p.rpc.Erc721Name(&token.Address)
 	if err != nil {
-		p.log.Noticef("ERC721 name failed for %s; %s", token.Address.String(), err.Error())
+		p.log.Debugf("ERC721 name failed for %s; %s", token.Address.String(), err.Error())
 		return nil, err
 	}
 
 	// get symbol (ignore fail - symbol is optional in ERC721)
 	token.Symbol, err = p.rpc.Erc721Symbol(&token.Address)
 	if err != nil {
-		p.log.Noticef("ERC721 symbol failed for %s; %s", token.Address.String(), err.Error())
+		p.log.Debugf("ERC721 symbol failed for %s; %s", token.Address.String(), err.Error())
 		return nil, err
 	}
 

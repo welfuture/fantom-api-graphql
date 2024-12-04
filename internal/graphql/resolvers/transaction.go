@@ -108,7 +108,7 @@ func (trx *Transaction) Block() (*Block, error) {
 func (trx *Transaction) tokenTransactions() ([]*types.TokenTransaction, error) {
 	// call for it only once
 	val, err, _ := trx.cg.Do("erc", func() (interface{}, error) {
-		log.Noticef("Loading ERC list for %s", trx.Hash.String())
+		log.Debugf("Loading ERC list for %s", trx.Hash.String())
 		return repository.R().TokenTransactionsByCall(&trx.Hash)
 	})
 	if err != nil {
