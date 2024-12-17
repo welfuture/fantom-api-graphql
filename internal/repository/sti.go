@@ -16,8 +16,8 @@ import (
 )
 
 // PullStakerInfo extracts an extended staker information from smart contact.
-func (p *proxy) PullStakerInfo(_ *hexutil.Big) (*types.StakerInfo, error) {
-	return nil, nil
+func (p *proxy) PullStakerInfo(id *hexutil.Big) (*types.StakerInfo, error) {
+	return p.rpc.StakerInfo(id)
 }
 
 // StoreStakerInfo stores staker information to in-memory cache for future use.
