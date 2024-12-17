@@ -71,6 +71,9 @@ type ContractValidationInput struct {
 
 // NewContract builds new resolvable smart contract structure.
 func NewContract(con *types.Contract) *Contract {
+	if con == nil {
+		return nil
+	}
 	return &Contract{Contract: *con}
 }
 
