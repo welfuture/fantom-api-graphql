@@ -7,15 +7,6 @@ extensions:
     xAPI Node A:
       url: https://xapi-nodea.fantom.network/
       introspect: false
-    xAPI Node B:
-      url: https://xapi-nodeb.fantom.network/
-      introspect: false
-    xAPI Node C:
-      url: https://xapi-nodec.fantom.network/
-      introspect: false
-    xAPI Node D:
-      url: https://xapi-noded.fantom.network/
-      introspect: false
-    xAPI Node E:
-      url: https://xapi-nodee.fantom.network/
+    Sonic xAPI:
+      url: https://xapi.sonic.soniclabs.com/
       introspect: false

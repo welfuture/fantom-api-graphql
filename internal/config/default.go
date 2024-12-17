@@ -63,7 +63,8 @@ const (
 	defSfcContract = "0xFC00FACE00000000000000000000000000000000"
 
 	// defStiContract holds deployment address of the Staker Info smart contract.
-	defStiContract = "0x92ffad75b8a942d149621a39502cdd8ad1dd57b4"
+	// defStiContract = "0x92ffad75b8a942d149621a39502cdd8ad1dd57b4"
+	defStiContract = "0xFf4cD89f549432c312c497628748d4d76AC180f6"
 
 	// defTokenLogoFilePath represents the default path to the tokens map file
 	defTokenLogoFilePath = "tokens.json"

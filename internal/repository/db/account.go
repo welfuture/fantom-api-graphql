@@ -3,6 +3,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fantom-api-graphql/internal/types"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -66,7 +67,7 @@ func (db *MongoDbBridge) Account(addr *common.Address) (*types.Account, error) {
 	// error on lookup?
 	if sr.Err() != nil {
 		// may be ErrNoDocuments, which we seek
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			return nil, nil
 		}
 
@@ -153,7 +154,7 @@ func (db *MongoDbBridge) IsAccountKnown(addr *common.Address) (bool, error) {
 	// error on lookup?
 	if sr.Err() != nil {
 		// may be ErrNoDocuments, which we seek
-		if sr.Err() == mongo.ErrNoDocuments {
+		if errors.Is(sr.Err(), mongo.ErrNoDocuments) {
 			return false, nil
 		}
 

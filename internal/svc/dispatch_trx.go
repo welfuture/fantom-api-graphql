@@ -2,6 +2,7 @@
 package svc
 
 import (
+	"bytes"
 	"fantom-api-graphql/internal/types"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -195,6 +196,11 @@ func (trd *trxDispatcher) pushAccounts(evt *eventTrx, wg *sync.WaitGroup) bool {
 
 // pushAccount pushes given account event to output queue observing terminate signal.
 func (trd *trxDispatcher) pushAccount(at string, adr *common.Address, blk *types.Block, trx *types.Transaction, wg *sync.WaitGroup) bool {
+	var deploy *common.Hash
+	if trx.ContractAddress != nil && bytes.Equal(adr.Bytes(), trx.ContractAddress.Bytes()) {
+		deploy = &trx.Hash
+	}
+
 	wg.Add(1)
 	select {
 	case trd.outAccount <- &eventAcc{
@@ -203,7 +209,7 @@ func (trd *trxDispatcher) pushAccount(at string, adr *common.Address, blk *types
 		act:      at,
 		blk:      blk,
 		trx:      trx,
-		deploy:   nil,
+		deploy:   deploy,
 	}:
 	case <-trd.sigStop:
 		return false

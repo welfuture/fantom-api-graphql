@@ -228,12 +228,6 @@ func (acc *Account) Delegations(args *struct {
 // Contract resolves the account smart contract detail,
 // if the account is a smart contract address.
 func (acc *Account) Contract() (*Contract, error) {
-	// is this actually a contract account?
-	if acc.ContractTx == nil {
-		return nil, nil
-	}
-
-	// get new contract
 	con, err := repository.R().Contract(&acc.Address)
 	if err != nil {
 		return nil, err
